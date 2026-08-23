@@ -1,0 +1,7 @@
+[server]
+headless = true        # don't prompt for email / just open browser automatically
+port = 8501
+runOnSave = false
+
+[browser]
+gatherUsageStats = false   # disables telemetry entirely
