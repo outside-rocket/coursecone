@@ -23,16 +23,32 @@ trap cleanup EXIT INT TERM
 
 echo "[1/2] Freeing port 8000 & starting backend -> http://localhost:8000/docs"
 kill_port 8000
-PY=$(command -v python || command -v py)   # module invocation avoids PATH issues
-uvicorn_bin() { "$PY" -m uvicorn "$@"; }
-streamlit_bin() { "$PY" -m streamlit "$@"; }
-uvicorn_bin app.main:app --port 8000 &
+
+# --- locate a working Python (module invocation avoids PATH issues) ---
+PY=""
+for cand in "$(command -v python 2>/dev/null)" \
+            "$(command -v py 2>/dev/null)" \
+            "$LOCALAPPDATA/Programs/Python/Python313/python.exe" \
+            "$HOME/AppData/Local/Programs/Python/Python313/python.exe" \
+            "/c/Python313/python.exe"; do
+  [ -n "$cand" ] && [ -x "$cand" ] && "$cand" -c "import sys" 2>/dev/null || continue
+  case "$(basename "$cand")" in   # reject WindowsApps store stubs
+    python.exe) "$cand" -c "exit(0)" 2>/dev/null || continue ;;
+  esac
+  PY="$cand"; break
+done
+if [ -z "$PY" ]; then echo "ERROR: Python not found"; exit 1; fi
+# 'py' launcher needs a version arg
+PYRUN="$PY"; [ "$(basename "$PY")" = "py.exe" ] && PYRUN="$PY -3"
+echo "Using Python: $PY"
+
+$PYRUN -m uvicorn app.main:app --port 8000 &
 API_PID=$!
 
 for i in $(seq 1 30); do curl -s http://localhost:8000/ >/dev/null 2>&1 && break; sleep 0.5; done
 
 echo "[2/2] Starting frontend -> http://localhost:8501"
 kill_port 8501
-streamlit_bin run frontend/streamlit_app.py
+$PYRUN -m streamlit run frontend/streamlit_app.py
 
 wait $API_PID
