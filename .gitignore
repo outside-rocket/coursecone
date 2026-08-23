@@ -1,0 +1,4 @@
+campuspeer.db
+__pycache__/
+*.pyc
+.env
