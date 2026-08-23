@@ -1,6 +1,4 @@
-"""Instagram-style follow/unfollow + mutual detection + direct messages."""
-from uuid import UUID
-
+"""Instagram-style follow/unfollow + mutual detection + direct chat."""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -12,7 +10,7 @@ from ..models import ChatMessage, Student, UserFollow
 router = APIRouter(prefix="/api/social", tags=["social"])
 
 
-def _is_mutual(db: Session, a: UUID, b: UUID) -> bool:
+def _is_mutual(db: Session, a: int, b: int) -> bool:
     return bool(db.query(UserFollow).filter_by(follower_id=a, following_id=b).first()
                 and db.query(UserFollow).filter_by(follower_id=b, following_id=a).first())
 
@@ -20,24 +18,23 @@ def _is_mutual(db: Session, a: UUID, b: UUID) -> bool:
 @router.post("/follow")
 def follow(body: dict, s: Student = Depends(current_student),
            db: Session = Depends(get_db)):
-    target = body.get("student_id")
     try:
-        target_uuid = UUID(target)
+        target = int(body.get("student_id"))
     except (TypeError, ValueError):
-        raise HTTPException(422, "student_id must be a UUID")
-    if target_uuid == s.student_id:
+        raise HTTPException(422, "student_id must be an integer id")
+    if target == s.student_id:
         raise HTTPException(400, "Cannot follow yourself")
-    if not db.get(Student, target_uuid):
+    if not db.get(Student, target):
         raise HTTPException(404, "Student not found")
     existing = db.query(UserFollow).filter_by(follower_id=s.student_id,
-                                              following_id=target_uuid).first()
+                                              following_id=target).first()
     if existing:  # toggle -> unfollow
         db.delete(existing)
         db.commit()
         return {"following": False}
-    db.add(UserFollow(follower_id=s.student_id, following_id=target_uuid))
+    db.add(UserFollow(follower_id=s.student_id, following_id=target))
     db.commit()
-    return {"following": True, "mutual": _is_mutual(db, s.student_id, target_uuid)}
+    return {"following": True, "mutual": _is_mutual(db, s.student_id, target)}
 
 
 @router.get("/followers")
@@ -45,7 +42,8 @@ def followers(s: Student = Depends(current_student), db: Session = Depends(get_d
     def names(rows):
         out = []
         for f in rows:
-            u = db.get(Student, f.follower_id if f.follower_id != s.student_id else f.following_id)
+            u = db.get(Student, f.follower_id if f.follower_id != s.student_id
+                       else f.following_id)
             out.append({"student_id": str(u.student_id), "name": u.name})
         return out
 
@@ -60,21 +58,19 @@ def followers(s: Student = Depends(current_student), db: Session = Depends(get_d
     }
 
 
-# ---------------- Direct chat (unlocked by mutual follow) ----------------
 class MessageIn(BaseModel):
-    receiver_id: str
+    receiver_id: int
     message_text: str
 
 
 @router.post("/message")
 def send_message(body: MessageIn, s: Student = Depends(current_student),
                  db: Session = Depends(get_db)):
-    rid = UUID(body.receiver_id)
-    if not _is_mutual(db, s.student_id, rid):
+    if not _is_mutual(db, s.student_id, body.receiver_id):
         raise HTTPException(403, "Direct chat requires a mutual follow")
     if not 1 <= len(body.message_text) <= 2000:
         raise HTTPException(422, "Message length must be 1-2000 chars")
-    m = ChatMessage(sender_id=s.student_id, receiver_id=rid,
+    m = ChatMessage(sender_id=s.student_id, receiver_id=body.receiver_id,
                     message_text=body.message_text)
     db.add(m)
     db.commit()
@@ -82,15 +78,14 @@ def send_message(body: MessageIn, s: Student = Depends(current_student),
 
 
 @router.get("/messages/{other_id}")
-def get_messages(other_id: str, s: Student = Depends(current_student),
+def get_messages(other_id: int, s: Student = Depends(current_student),
                  db: Session = Depends(get_db)):
-    oid = UUID(other_id)
-    if not _is_mutual(db, s.student_id, oid):
+    if not _is_mutual(db, s.student_id, other_id):
         raise HTTPException(403, "Direct chat requires a mutual follow")
     msgs = (db.query(ChatMessage)
             .filter(((ChatMessage.sender_id == s.student_id) &
-                     (ChatMessage.receiver_id == oid)) |
-                    ((ChatMessage.sender_id == oid) &
+                     (ChatMessage.receiver_id == other_id)) |
+                    ((ChatMessage.sender_id == other_id) &
                      (ChatMessage.receiver_id == s.student_id)))
             .order_by(ChatMessage.sent_at).all())
     return [{"from": str(m.sender_id), "text": m.message_text,

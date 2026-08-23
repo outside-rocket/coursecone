@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import uuid
+import uuid  # noqa: F401  (kept for token compat)
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -19,12 +19,12 @@ def verify_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode(), hashed.encode())
 
 
-def create_token(student_id: uuid.UUID) -> str:
+def create_token(student_id: int) -> str:
     payload = {"sub": str(student_id),
                "exp": datetime.now(timezone.utc) + timedelta(minutes=TOKEN_EXPIRE_MINUTES)}
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def decode_token(token: str) -> uuid.UUID:
+def decode_token(token: str) -> int:
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    return uuid.UUID(payload["sub"])
+    return int(payload["sub"])

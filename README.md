@@ -11,7 +11,9 @@ matching marketplace with atomic, ACID-safe swap execution.
 ## Architecture
 
 ```
-database/schema.sql        Full PostgreSQL DDL: tables, CHECKs, composite PKs,
+database/schema.sql        Full DDL: PERSON EER superclass (Option 8A), weak-entity
+                           CLASS_OFFERING, 1NF slot breakdown, CHECKs, indexes,
+
                            ON DELETE CASCADE, B+ tree indexes, overlap trigger,
                            security views, 2PL swap transaction template
 app/                       FastAPI backend
@@ -19,7 +21,7 @@ app/                       FastAPI backend
   ├─ grid_engine.py        Flat records → 2-tier Theory/Lab weekly matrix
   ├─ models.py             SQLAlchemy ORM (Postgres + SQLite compatible)
   ├─ routers/              auth · timetable · classmates · social · swap
-parser/portal_parser.py    Clipboard text / HTML → clean relational records
+parser.py                  Multi-line portal parser (state machine + regex blocks):
 app/static/            Glassmorphism lofi UI (vanilla HTML/CSS/JS): upload,
                        grid, classmates, chat, live slot-trading cards
 ```
