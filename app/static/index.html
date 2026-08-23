@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusPeer — late night study club</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="stars"></div>
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+<div class="glow glow-3"></div>
+
+<!-- ============ AUTH ============ -->
+<main id="auth-view" class="center-screen">
+  <div class="glass auth-card fade-in">
+    <div class="logo">☾ CampusPeer</div>
+    <p class="tagline">late-night timetable match &amp; slot exchange</p>
+
+    <div class="tab-row">
+      <button class="tab active" data-auth-tab="login">sign in</button>
+      <button class="tab" data-auth-tab="register">join</button>
+    </div>
+
+    <form id="login-form" class="auth-form">
+      <input type="email" id="li-email" placeholder="you@vitstudent.ac.in" required>
+      <input type="password" id="li-pass" placeholder="password" required>
+      <button class="btn btn-primary" type="submit">enter the study room →</button>
+    </form>
+
+    <form id="register-form" class="auth-form hidden">
+      <input type="text" id="rg-roll" placeholder="roll no (22BCE0001)" required>
+      <input type="text" id="rg-name" placeholder="your name" required>
+      <input type="email" id="rg-email" placeholder="you@vitstudent.ac.in" required>
+      <input type="password" id="rg-pass" placeholder="password" required>
+      <button class="btn btn-primary" type="submit">create account ☾</button>
+    </form>
+
+    <p id="auth-error" class="error-msg"></p>
+  </div>
+  <footer class="lofi-footer">♪ lofi beats to swap slots to — SDG 4 · SDG 10</footer>
+</main>
+
+<!-- ============ APP ============ -->
+<div id="app-view" class="hidden">
+  <nav class="topbar glass">
+    <span class="logo small">☾ CampusPeer</span>
+    <div class="nav-tabs">
+      <button class="nav-btn active" data-view="timetable">timetable</button>
+      <button class="nav-btn" data-view="classmates">classmates</button>
+      <button class="nav-btn" data-view="social">social</button>
+      <button class="nav-btn" data-view="swap">slot market</button>
+    </div>
+    <button id="logout-btn" class="btn btn-ghost" title="sign out">⏻</button>
+  </nav>
+  <p id="toast" class="toast hidden"></p>
+
+  <!-- ----- TIMETABLE ----- -->
+  <section id="view-timetable" class="view">
+    <div class="glass panel">
+      <h2>paste your FFCS registration</h2>
+      <p class="hint">copy the table from the portal and drop it here — tabs or html, both work.</p>
+      <textarea id="raw-upload" rows="6" spellcheck="false"
+        placeholder="BCSE302L - Data Structures	4	PC	Hard	CH2026270100945 - 53616 - AB3-505	A1+TA1	Dr. Ramesh (53616)	Registered"></textarea>
+      <div class="row-end">
+        <button id="upload-btn" class="btn btn-primary">parse &amp; save ✦</button>
+      </div>
+    </div>
+
+    <div class="glass panel grid-panel">
+      <div class="panel-head">
+        <h2>this week</h2>
+        <span id="free-count" class="pill"></span>
+      </div>
+      <div class="table-wrap"><table id="grid-table"></table></div>
+      <div id="lab-list"></div>
+    </div>
+  </section>
+
+  <!-- ----- CLASSMATES ----- -->
+  <section id="view-classmates" class="view hidden">
+    <div class="glass panel">
+      <h2>who's in my class?</h2>
+      <div class="search-row">
+        <input id="cm-course" placeholder="course code e.g. BCSE302L">
+        <input id="cm-slot" placeholder="slot e.g. A1 (optional)">
+        <button id="cm-search" class="btn btn-primary">find peers ⌕</button>
+      </div>
+    </div>
+    <div id="cm-results"></div>
+  </section>
+
+  <!-- ----- SOCIAL ----- -->
+  <section id="view-social" class="view hidden">
+    <div class="glass panel">
+      <h2>your people</h2>
+      <div id="network-stats" class="stat-row"></div>
+      <div id="mutual-list"></div>
+    </div>
+    <div class="glass panel chat-panel">
+      <h2>quiet chat <span class="hint-inline">mutuals only</span></h2>
+      <select id="chat-with"></select>
+      <div id="chat-box" class="chat-box"><p class="hint">pick a mutual to start talking…</p></div>
+      <div class="chat-input-row">
+        <input id="chat-input" placeholder="say something nice…">
+        <button id="chat-send" class="btn btn-primary">send ↵</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ----- SWAP ----- -->
+  <section id="view-swap" class="view hidden">
+    <div class="glass panel">
+      <h2>list a slot for trade</h2>
+      <div class="swap-form">
+        <input id="sw-class" placeholder="your class id e.g. CH2026270100945">
+        <input id="sw-want-course" placeholder="desired course e.g. BCSE305L">
+        <input id="sw-want-slots" placeholder="desired slots e.g. B2+TB2 or A2+TA2">
+        <button id="sw-create" class="btn btn-primary">put on the market ⇄</button>
+      </div>
+    </div>
+    <div class="row-between">
+      <h2 class="section-title">open trades</h2>
+      <button id="sw-match" class="btn btn-secondary">find matches ⟳</button>
+    </div>
+    <div id="sw-results"></div>
+  </section>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

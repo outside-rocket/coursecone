@@ -20,16 +20,16 @@ app/                       FastAPI backend
   ├─ models.py             SQLAlchemy ORM (Postgres + SQLite compatible)
   ├─ routers/              auth · timetable · classmates · social · swap
 parser/portal_parser.py    Clipboard text / HTML → clean relational records
-frontend/streamlit_app.py  Interactive UI: upload, grid, classmates, chat,
-                           live slot-trading cards
+app/static/            Glassmorphism lofi UI (vanilla HTML/CSS/JS): upload,
+                       grid, classmates, chat, live slot-trading cards
 ```
 
-## Quick start (dev — SQLite fallback)
+## Quick start (dev — SQLite fallback, single server)
 
 ```bash
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000      # API + docs at /docs
-streamlit run frontend/streamlit_app.py        # UI on :8501
+open http://localhost:8000                  # UI is served by the API
 ```
 
 ## Production (PostgreSQL)

@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from .database import Base, engine
 from .routers import auth, classmates, social, swap, timetable
@@ -21,6 +23,8 @@ app.include_router(swap.router)
 
 
 @app.get("/")
-def root():
-    return {"app": "CampusPeer", "docs": "/docs",
-            "slots_defined": len(SLOT_DEFINITIONS)}
+def index():
+    return FileResponse("app/static/index.html")
+
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
