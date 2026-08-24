@@ -1,22 +1,22 @@
 /* ==========================================================================
    CourseConE — Formal Monochromatic Liquid Glass Design System
-   Dark Constellation Canvas · Optical Glass Refraction · 2% Cyan Accent
+   Pure Pitch Black Background · Floating Liquid Glass Tooltip Lens · 2% Cyan Accent
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. FORMAL MONOCHROME TOKENS (Black, White, Charcoal, 2% Cyan)
+   1. FORMAL MONOCHROME TOKENS (Pure Pitch Black, Charcoal, White, 2% Cyan)
    -------------------------------------------------------------------------- */
 :root {
-  /* Deep Space Cosmic Void */
-  --bg-deep: #020204;
-  --bg-void: #050508;
-  --bg-surface: #0a0a0e;
+  /* Pure Pitch Black Void (Zero Navy Blue) */
+  --bg-deep: #000000;
+  --bg-void: #030303;
+  --bg-surface: #080808;
   
-  /* Translucent Liquid Glass Tiers (Calibrated for visible optical refraction) */
-  --glass-lvl0: rgba(8, 8, 12, 0.40);
-  --glass-lvl1: rgba(10, 10, 15, 0.54);   /* Visible constellation diffusion */
-  --glass-lvl2: rgba(14, 14, 20, 0.68);   /* Elevated cards */
-  --glass-lvl3: rgba(18, 18, 26, 0.88);   /* Floating HUD & modals */
+  /* Translucent Liquid Glass Tiers */
+  --glass-lvl0: rgba(10, 10, 10, 0.40);
+  --glass-lvl1: rgba(12, 12, 12, 0.58);   /* Standard panels showing constellation diffusion */
+  --glass-lvl2: rgba(16, 16, 16, 0.72);   /* Elevated cards & hover lens */
+  --glass-lvl3: rgba(20, 20, 20, 0.88);   /* Floating HUD & modals */
   --glass-subtle: rgba(255, 255, 255, 0.03);
 
   /* Ultra-Thin Minimalist Hairlines */
@@ -25,11 +25,11 @@
   --hairline-bright: 1px solid rgba(255, 255, 255, 0.16);
   --hairline-cyan: 1px solid rgba(0, 240, 255, 0.35);
 
-  /* Inset Physical Specular Edges & Inset Highlights */
-  --specular-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+  /* Inset Physical Specular Edges */
+  --specular-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
   --specular-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-  --shadow-liquid: 0 16px 40px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  --shadow-floating: 0 24px 60px -12px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.09);
+  --shadow-liquid: 0 16px 40px -10px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --shadow-floating: 0 24px 60px -12px rgba(0, 0, 0, 0.98), 0 0 0 1px rgba(255, 255, 255, 0.1);
 
   /* 2% Controlled Cyan & Monochrome Palette */
   --cyan: #00f0ff;
@@ -69,8 +69,8 @@
   --danger: #ef4444;
 
   /* Performance-Optimized Adaptive Blur */
-  --blur-base: blur(18px) saturate(150%);
-  --blur-elevated: blur(26px) saturate(160%);
+  --blur-base: blur(20px) saturate(150%);
+  --blur-elevated: blur(28px) saturate(160%);
   --blur-subtle: blur(10px);
 
   /* Radii & Dimensions */
@@ -133,7 +133,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   3. DARK CONSTELLATION CANVAS & OPTICAL DEPTH
+   3. DARK CONSTELLATIONS CANVAS (PURE PITCH BLACK BASE)
    -------------------------------------------------------------------------- */
 #liquid-canvas {
   position: fixed;
@@ -142,7 +142,7 @@ body {
   height: 100vh;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 15%, #080812 0%, #020204 90%);
+  background: #000000; /* Pure pitch black base — no navy blue */
 }
 
 .bg-layer, .ambient-mesh {
@@ -156,7 +156,7 @@ body {
   background-size: 32px 32px;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
 /* Ultra-Subtle Liquid Cursor Light (2% Cyan Touch) */
@@ -200,7 +200,7 @@ body:hover #liquid-cursor-follower {
   transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Dynamic 2D Specular Ray Reflection following cursor */
+/* Dynamic 2D Specular Reflection */
 .glass::before,
 .liquid-glass::before,
 .glass-panel::before,
@@ -323,7 +323,7 @@ h2 {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 14px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 14px rgba(0, 0, 0, 0.5);
 }
 
 .btn-primary:hover {
@@ -359,7 +359,7 @@ h2 {
 .tab-row {
   display: inline-flex;
   gap: 2px;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.6);
   padding: 3px;
   border-radius: var(--radius-sm);
   border: var(--hairline-subtle);
@@ -413,7 +413,7 @@ h2 {
    -------------------------------------------------------------------------- */
 input, textarea, select {
   width: 100%;
-  background: rgba(8, 8, 12, 0.65);
+  background: rgba(8, 8, 8, 0.75);
   border: var(--hairline);
   border-radius: var(--radius-sm);
   padding: 11px 14px;
@@ -428,7 +428,7 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
   border-color: rgba(0, 240, 255, 0.45);
-  background: rgba(12, 12, 16, 0.85);
+  background: rgba(12, 12, 12, 0.9);
   box-shadow: 0 0 0 1px rgba(0, 240, 255, 0.25);
 }
 
@@ -454,7 +454,7 @@ select {
 }
 
 option {
-  background: #09090d;
+  background: #080808;
   color: var(--text-primary);
 }
 
@@ -600,7 +600,7 @@ option {
   display: flex;
   flex-direction: column;
   padding: 14px 10px;
-  background: rgba(10, 10, 15, 0.78);
+  background: rgba(10, 10, 10, 0.78);
   backdrop-filter: var(--blur-elevated);
   -webkit-backdrop-filter: var(--blur-elevated);
   border: var(--hairline);
@@ -789,7 +789,7 @@ option {
   min-width: 190px;
   padding: 8px;
   z-index: 200;
-  background: rgba(14, 14, 20, 0.94);
+  background: rgba(14, 14, 14, 0.95);
   backdrop-filter: var(--blur-elevated);
   -webkit-backdrop-filter: var(--blur-elevated);
   border: var(--hairline-bright);
@@ -884,7 +884,7 @@ option {
   bottom: 24px;
   right: 24px;
   padding: 10px 18px;
-  background: rgba(16, 16, 22, 0.94);
+  background: rgba(16, 16, 16, 0.95);
   backdrop-filter: var(--blur-elevated);
   -webkit-backdrop-filter: var(--blur-elevated);
   border: var(--hairline-cyan);
@@ -892,7 +892,7 @@ option {
   color: #ffffff;
   font-size: 13px;
   font-weight: 500;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
   z-index: 1000;
 }
 
@@ -901,11 +901,12 @@ option {
 }
 
 /* --------------------------------------------------------------------------
-   11. TIMETABLE MATRIX & SLOT EXPANSION INSPECTOR
+   11. TIMETABLE MATRIX & FLOATING LIQUID GLASS TOOLTIP LENS
    -------------------------------------------------------------------------- */
 .tt-wrap {
   max-width: min(1780px, 98vw);
   margin: 0 auto;
+  position: relative;
 }
 
 .grid-panel {
@@ -958,7 +959,7 @@ option {
   letter-spacing: 0.05em;
   padding: 0 10px;
   min-width: 52px;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.55);
   border-radius: var(--radius-sm) 0 0 var(--radius-sm);
   border-right: var(--hairline-subtle);
 }
@@ -973,7 +974,7 @@ option {
   padding: 0 8px;
   white-space: nowrap;
   min-width: 30px;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.45);
   border-right: var(--hairline-subtle);
 }
 
@@ -982,7 +983,7 @@ option {
 
 .theory-row > td,
 .lab-row > td {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.35);
   border-right: var(--hairline-subtle);
   padding: 0;
   min-width: 54px;
@@ -991,6 +992,7 @@ option {
   vertical-align: middle;
   line-height: 1.3;
   transition: background 0.15s ease;
+  position: relative;
 }
 
 .theory-row > td:last-child { border-top-right-radius: 4px; border-right: none; }
@@ -1002,6 +1004,7 @@ option {
   color: #f0fdf4;
   padding: 5px 6px;
   border-right: 1px solid var(--tint-theory-border) !important;
+  cursor: pointer;
 }
 
 .theory-row > td.occ:hover {
@@ -1013,6 +1016,7 @@ option {
   color: #fefce8;
   padding: 5px 6px;
   border-right: 1px solid var(--tint-lab-border) !important;
+  cursor: pointer;
 }
 
 .lab-row > td.occ:hover {
@@ -1022,7 +1026,6 @@ option {
 .tt-tip {
   font-weight: 600;
   display: block;
-  cursor: pointer;
 }
 
 td.occ small {
@@ -1039,79 +1042,100 @@ td.occ small {
 .lunch-spacer {
   width: 14px;
   min-width: 14px;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.55);
   border-left: var(--hairline-subtle);
   border-right: var(--hairline-subtle);
 }
 
 /* ==========================================================================
-   HOVER EXPANSION / RICH DETAIL INSPECTOR DRAWER
+   FLOATING LIQUID GLASS TOOLTIP LENS (HOVERING DIRECTLY ABOVE TIMETABLE)
    ========================================================================== */
-#slot-detail-inspector {
+#liquid-glass-lens {
   position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(120%);
-  width: min(620px, 94vw);
-  background: rgba(14, 14, 20, 0.96);
+  top: 0;
+  left: 0;
+  width: 330px;
+  background: rgba(12, 12, 12, 0.74);
   backdrop-filter: var(--blur-elevated);
   -webkit-backdrop-filter: var(--blur-elevated);
-  border: var(--hairline-bright);
-  border-radius: var(--radius-lg);
-  padding: 16px 20px;
-  z-index: 1000;
-  box-shadow: var(--shadow-floating), 0 0 20px rgba(0, 240, 255, 0.15);
-  transition: transform 0.28s var(--ease-out), opacity 0.28s ease;
-  opacity: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  z-index: 999;
+  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.98), 
+              0 0 0 1px rgba(255, 255, 255, 0.08),
+              inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+              0 0 24px rgba(0, 240, 255, 0.12);
   pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-1000px, -1000px, 0) scale(0.96);
+  transition: opacity 0.18s ease, transform 0.18s var(--ease-out);
+  will-change: transform, opacity;
 }
 
-#slot-detail-inspector.visible {
-  transform: translateX(-50%) translateY(0);
+#liquid-glass-lens.active {
   opacity: 1;
-  pointer-events: auto;
+  transform: translate3d(var(--lens-x, 0), var(--lens-y, 0), 0) scale(1);
 }
 
-.inspector-header {
+.lens-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.lens-badge {
+  font-size: 10px;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--cyan-subtle);
+  color: var(--cyan);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.lens-status {
+  font-size: 10px;
+  color: #86efac;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lens-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.3;
   margin-bottom: 8px;
 }
 
-.inspector-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.inspector-grid {
+.lens-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-top: 10px;
-  padding-top: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding-top: 6px;
   border-top: var(--hairline-subtle);
 }
 
-.inspector-item {
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 4px;
-  padding: 6px 10px;
-}
-
-.inspector-item .lbl {
-  font-size: 9.5px;
+.lens-item .lbl {
+  font-size: 9px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
-.inspector-item .val {
-  font-size: 12.5px;
+.lens-item .val {
+  font-size: 11.5px;
   font-weight: 500;
   color: var(--text-secondary);
-  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* --------------------------------------------------------------------------
@@ -1174,7 +1198,7 @@ td.occ small {
 }
 
 .course-tab small {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 10.5px;
@@ -1280,7 +1304,7 @@ td.occ small {
 }
 
 .stat {
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.45);
   border: var(--hairline-subtle);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
@@ -1415,7 +1439,7 @@ td.occ small {
 }
 
 .cmp-row > td {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.35);
   border-right: var(--hairline-subtle);
   padding: 7px 5px;
   text-align: center;
@@ -1470,7 +1494,7 @@ td.occ small {
 #command-palette-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(2, 2, 4, 0.82);
+  background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   z-index: 500;
@@ -1482,10 +1506,10 @@ td.occ small {
 
 .command-palette-card {
   width: min(520px, 92vw);
-  background: rgba(14, 14, 20, 0.96);
+  background: rgba(14, 14, 14, 0.96);
   border: var(--hairline-bright);
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
   overflow: hidden;
 }
 
@@ -1546,7 +1570,7 @@ td.occ small {
 #liquid-loader-screen {
   position: fixed;
   inset: 0;
-  background: #020204;
+  background: #000000;
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -1642,7 +1666,7 @@ td.occ small {
     width: 38px;
     height: 38px;
     border-radius: var(--radius-sm);
-    background: rgba(14, 14, 20, 0.9);
+    background: rgba(14, 14, 14, 0.9);
     border: var(--hairline);
     color: #ffffff;
     font-size: 18px;
@@ -1654,8 +1678,8 @@ td.occ small {
     padding: 24px 18px;
   }
 
-  .inspector-grid {
-    grid-template-columns: 1fr 1fr;
+  #liquid-glass-lens {
+    width: min(290px, 86vw);
   }
 }
 

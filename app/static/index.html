@@ -23,32 +23,25 @@
 <!-- ============ SIGNATURE CURSOR LIGHT ORB (2% Cyan Touch) ============ -->
 <div id="liquid-cursor-follower" aria-hidden="true"></div>
 
-<!-- ============ ROLLS-ROYCE STARLIGHT ROOF CANVAS ============ -->
+<!-- ============ DARK CONSTELLATIONS CANVAS (PURE PITCH BLACK) ============ -->
 <canvas id="liquid-canvas" aria-hidden="true"></canvas>
 <div class="noise-overlay" aria-hidden="true"></div>
 
-<!-- ============ EXPANDED SLOT DETAIL INSPECTOR (Hover / Click Trigger) ============ -->
-<div id="slot-detail-inspector" class="glass-elevated" aria-live="polite">
-  <div class="inspector-header">
-    <div class="inspector-title" id="insp-course-title">BCSE302L — Database Systems</div>
-    <button type="button" id="insp-close-btn" class="btn btn-ghost" style="padding:2px 6px; font-size:11px;">✕</button>
+<!-- ============ FLOATING LIQUID GLASS TOOLTIP LENS (HOVERS ABOVE TIMETABLE) ============ -->
+<div id="liquid-glass-lens" aria-hidden="true">
+  <div class="lens-header">
+    <span class="lens-badge" id="lens-token">A1+TA1</span>
+    <span class="lens-status">● ACID Conflict Free</span>
   </div>
-  <div class="inspector-grid">
-    <div class="inspector-item">
-      <div class="lbl">Slot Token</div>
-      <div class="val" id="insp-slot-token">A1+TA1</div>
+  <div class="lens-title" id="lens-title">Database Systems</div>
+  <div class="lens-grid">
+    <div class="lens-item">
+      <div class="lbl">Venue</div>
+      <div class="val" id="lens-venue">AB3-505</div>
     </div>
-    <div class="inspector-item">
-      <div class="lbl">Class Venue</div>
-      <div class="val" id="insp-venue">AB3-505</div>
-    </div>
-    <div class="inspector-item">
+    <div class="lens-item">
       <div class="lbl">Faculty</div>
-      <div class="val" id="insp-faculty">HELEN VIJITHA P</div>
-    </div>
-    <div class="inspector-item">
-      <div class="lbl">Conflict Radar</div>
-      <div class="val" id="insp-status" style="color:var(--tint-theory-text);">ACID Verified ✓</div>
+      <div class="val" id="lens-faculty">HELEN VIJITHA P</div>
     </div>
   </div>
 </div>
@@ -233,7 +226,7 @@
           <div class="panel-head">
             <div>
               <h2 class="text-gradient">Weekly Timetable Matrix</h2>
-              <p class="hint">5-Day Theory &amp; Lab Grid · Hover or click any slot to expand full specification</p>
+              <p class="hint">5-Day Theory &amp; Lab Grid · Hover any course slot to inspect floating Liquid Glass lens</p>
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
               <button type="button" class="btn btn-secondary" id="btn-quick-palette" title="Quick Search (Ctrl+K)">

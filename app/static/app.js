@@ -1,6 +1,6 @@
 /* ==========================================================================
    CourseConE — Formal Monochromatic Liquid Glass Client Engine
-   Dark Constellations Canvas · 2% Cyan Accent · Flat 2D Precision
+   Pure Pitch Black Background · Floating Liquid Glass Lens · 2% Cyan Accent
    ========================================================================== */
 
 const $ = (s) => document.querySelector(s);
@@ -63,7 +63,7 @@ function dismissLoader() {
 }
 
 /* --------------------------------------------------------------------------
-   3. DARK CONSTELLATIONS & CELESTIAL NEXUS CANVAS
+   3. DARK CONSTELLATIONS CANVAS (PURE PITCH BLACK BASE)
    -------------------------------------------------------------------------- */
 (function initConstellationsCanvas() {
   const canvas = $("#liquid-canvas");
@@ -73,7 +73,7 @@ function dismissLoader() {
   let stars = [];
   let shootingStars = [];
   let mouse = { x: -1000, y: -1000, active: false, radius: 140 };
-  const starCount = window.innerWidth < 768 ? 65 : 125;
+  const starCount = window.innerWidth < 768 ? 65 : 130;
   const connectionDist = window.innerWidth < 768 ? 95 : 120;
 
   function resize() {
@@ -109,7 +109,7 @@ function dismissLoader() {
       this.phase = Math.random() * Math.PI * 2;
       this.twinkleSpeed = Math.random() * 0.018 + 0.006;
       this.isMajor = this.radius > 1.8;
-      this.isCyan = Math.random() < 0.035; // 2-3% controlled subtle cyan constellation anchors
+      this.isCyan = Math.random() < 0.035; // 2% controlled subtle cyan constellation anchors
     }
     update() {
       this.x += this.vx;
@@ -138,7 +138,6 @@ function dismissLoader() {
       const alpha = this.baseAlpha + Math.sin(this.phase) * (this.baseAlpha * 0.55);
       const effAlpha = Math.max(0.06, Math.min(0.95, alpha));
 
-      // Star point
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
       ctx.fillStyle = this.isCyan
@@ -146,7 +145,6 @@ function dismissLoader() {
         : `rgba(255, 255, 255, ${effAlpha})`;
       ctx.fill();
 
-      // Subtle halo for major anchor stars
       if (this.isMajor) {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius * 2.8, 0, Math.PI * 2);
@@ -231,7 +229,6 @@ function dismissLoader() {
         }
       }
 
-      // Connect stars near mouse to cursor position
       if (mouse.active) {
         const dx = stars[i].x - mouse.x;
         const dy = stars[i].y - mouse.y;
@@ -249,7 +246,10 @@ function dismissLoader() {
   }
 
   function loop() {
-    ctx.clearRect(0, 0, width, height);
+    // Pure pitch black clear
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, width, height);
+
     for (let s of stars) {
       s.update();
     }
@@ -298,28 +298,45 @@ function dismissLoader() {
 })();
 
 /* --------------------------------------------------------------------------
-   5. EXPANDED SLOT DETAIL INSPECTOR (Hover / Click HUD)
+   5. FLOATING LIQUID GLASS TOOLTIP LENS (HOVERS ABOVE TIMETABLE CELLS)
    -------------------------------------------------------------------------- */
-let inspectorTimer = null;
+let lensTimer = null;
 
-function showSlotInspector(data) {
-  const insp = $("#slot-detail-inspector");
-  if (!insp) return;
+function positionFloatingLens(targetEl, data) {
+  const lens = $("#liquid-glass-lens");
+  if (!lens || !targetEl) return;
 
-  $("#insp-course-title").textContent = `${data.course_code || ""} — ${data.course_title || "Course Slot"}`;
-  $("#insp-slot-token").textContent = data.slot_token || data.token || "—";
-  $("#insp-venue").textContent = data.venue || "TBD";
-  $("#insp-faculty").textContent = data.faculty || "TBD";
+  const rect = targetEl.getBoundingClientRect();
+  const lensWidth = lens.offsetWidth || 330;
+  const lensHeight = lens.offsetHeight || 110;
 
-  insp.classList.add("visible");
+  // Position above the hovered cell
+  let x = rect.left + (rect.width / 2) - (lensWidth / 2);
+  let y = rect.top - lensHeight - 12;
+
+  // Clamp within viewport
+  if (x < 14) x = 14;
+  if (x + lensWidth > window.innerWidth - 14) x = window.innerWidth - lensWidth - 14;
+  if (y < 14) {
+    // If not enough room above, flip below the slot
+    y = rect.bottom + 12;
+  }
+
+  lens.style.setProperty("--lens-x", `${Math.round(x)}px`);
+  lens.style.setProperty("--lens-y", `${Math.round(y)}px`);
+
+  $("#lens-token").textContent = data.slot_token || data.token || "SLOT";
+  $("#lens-title").textContent = `${data.course_code ? data.course_code + " — " : ""}${data.course_title || "Course Slot"}`;
+  $("#lens-venue").textContent = data.venue || "TBD";
+  $("#lens-faculty").textContent = data.faculty || "TBD";
+
+  lens.classList.add("active");
 }
 
-function hideSlotInspector() {
-  const insp = $("#slot-detail-inspector");
-  if (insp) insp.classList.remove("visible");
+function hideFloatingLens() {
+  const lens = $("#liquid-glass-lens");
+  if (lens) lens.classList.remove("active");
 }
-
-$("#insp-close-btn")?.addEventListener("click", hideSlotInspector);
 
 /* --------------------------------------------------------------------------
    6. COMMAND PALETTE HUD (Cmd+K)
@@ -349,7 +366,7 @@ $("#insp-close-btn")?.addEventListener("click", hideSlotInspector);
       palette && palette.classList.contains("hidden") ? openPalette() : closePalette();
     } else if (e.key === "Escape") {
       closePalette();
-      hideSlotInspector();
+      hideFloatingLens();
     }
   });
 
@@ -509,7 +526,7 @@ $$(".nav-btn[data-view]").forEach((btn) =>
 
 function showView(name) {
   CURRENT_VIEW = name;
-  hideSlotInspector();
+  hideFloatingLens();
   $$(".nav-btn[data-view]").forEach((b) =>
     b.classList.toggle("active", b.dataset.view === name));
   $$(".view").forEach((v) => v.classList.add("hidden"));
@@ -526,7 +543,7 @@ function showView(name) {
 }
 
 /* --------------------------------------------------------------------------
-   9. TIMETABLE MATRIX & EXPANDED INSPECTION
+   9. TIMETABLE MATRIX & FLOATING LIQUID GLASS HOVER LENS
    -------------------------------------------------------------------------- */
 const SAMPLE_REGISTRATION_DATA = `1
 General (Semester)
@@ -660,32 +677,29 @@ async function loadGrid() {
   }
   if ($("#grid-table")) $("#grid-table").innerHTML = html;
 
-  // Bind Expanded Hover & Click Slot Detail Inspector
+  // Bind Floating Liquid Glass Lens directly above hovered cell
   $$("#grid-table td.occ").forEach((td) => {
     const tipEl = td.querySelector(".tt-tip");
     if (!tipEl) return;
 
     td.addEventListener("mouseenter", () => {
-      clearTimeout(inspectorTimer);
-      inspectorTimer = setTimeout(() => {
+      clearTimeout(lensTimer);
+      lensTimer = setTimeout(() => {
         try {
           const data = JSON.parse(tipEl.getAttribute("data-slot-json"));
-          showSlotInspector(data);
+          positionFloatingLens(td, data);
         } catch (e) {}
-      }, 140);
+      }, 90);
     });
 
     td.addEventListener("mouseleave", () => {
-      clearTimeout(inspectorTimer);
-    });
-
-    td.addEventListener("click", () => {
-      try {
-        const data = JSON.parse(tipEl.getAttribute("data-slot-json"));
-        showSlotInspector(data);
-      } catch (e) {}
+      clearTimeout(lensTimer);
+      lensTimer = setTimeout(hideFloatingLens, 120);
     });
   });
+
+  // Hide floating lens if scrolling timetable
+  $(".table-wrap")?.addEventListener("scroll", hideFloatingLens);
 }
 
 /* --------------------------------------------------------------------------
