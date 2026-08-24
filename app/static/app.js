@@ -1,6 +1,6 @@
 /* ==========================================================================
    CourseConE — Formal Monochromatic Liquid Glass Client Engine
-   Rolls-Royce Starlight Roof · 2% Cyan Accent · Flat 2D Precision
+   Dark Constellations Canvas · 2% Cyan Accent · Flat 2D Precision
    ========================================================================== */
 
 const $ = (s) => document.querySelector(s);
@@ -63,16 +63,18 @@ function dismissLoader() {
 }
 
 /* --------------------------------------------------------------------------
-   3. ROLLS-ROYCE STARLIGHT ROOF CANVAS (Fiber-Optic Night Sky)
+   3. DARK CONSTELLATIONS & CELESTIAL NEXUS CANVAS
    -------------------------------------------------------------------------- */
-(function initStarlightRoof() {
+(function initConstellationsCanvas() {
   const canvas = $("#liquid-canvas");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
   let width, height;
   let stars = [];
   let shootingStars = [];
-  const starCount = window.innerWidth < 768 ? 90 : 180;
+  let mouse = { x: -1000, y: -1000, active: false, radius: 140 };
+  const starCount = window.innerWidth < 768 ? 65 : 125;
+  const connectionDist = window.innerWidth < 768 ? 95 : 120;
 
   function resize() {
     width = canvas.width = window.innerWidth;
@@ -81,27 +83,78 @@ function dismissLoader() {
   window.addEventListener("resize", resize);
   resize();
 
-  class Star {
+  window.addEventListener("mousemove", (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.active = true;
+  });
+
+  window.addEventListener("mouseleave", () => {
+    mouse.active = false;
+    mouse.x = -1000;
+    mouse.y = -1000;
+  });
+
+  class StarNode {
     constructor() {
+      this.reset(true);
+    }
+    reset(initial = false) {
       this.x = Math.random() * width;
-      this.y = Math.random() * height;
-      this.radius = Math.random() * 1.1 + 0.35; // Pinpoint optical fiber sizes
-      this.baseAlpha = Math.random() * 0.45 + 0.15;
+      this.y = initial ? Math.random() * height : (Math.random() > 0.5 ? -10 : height + 10);
+      this.vx = (Math.random() - 0.5) * 0.22;
+      this.vy = (Math.random() - 0.5) * 0.22;
+      this.radius = Math.random() < 0.15 ? (Math.random() * 1.2 + 1.6) : (Math.random() * 0.9 + 0.6);
+      this.baseAlpha = Math.random() * 0.4 + 0.2;
       this.phase = Math.random() * Math.PI * 2;
-      this.twinkleSpeed = Math.random() * 0.02 + 0.006;
-      this.isCyan = Math.random() < 0.025; // 2% subtle cyan starlight dots
+      this.twinkleSpeed = Math.random() * 0.018 + 0.006;
+      this.isMajor = this.radius > 1.8;
+      this.isCyan = Math.random() < 0.035; // 2-3% controlled subtle cyan constellation anchors
     }
     update() {
+      this.x += this.vx;
+      this.y += this.vy;
       this.phase += this.twinkleSpeed;
+
+      // Soft boundary wraparound
+      if (this.x < -20) this.x = width + 20;
+      if (this.x > width + 20) this.x = -20;
+      if (this.y < -20) this.y = height + 20;
+      if (this.y > height + 20) this.y = -20;
+
+      // Subtle mouse nexus attraction
+      if (mouse.active) {
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < mouse.radius && dist > 10) {
+          const force = (mouse.radius - dist) / mouse.radius;
+          this.x += (dx / dist) * force * 0.45;
+          this.y += (dy / dist) * force * 0.45;
+        }
+      }
     }
     draw() {
-      const alpha = this.baseAlpha + Math.sin(this.phase) * (this.baseAlpha * 0.85);
+      const alpha = this.baseAlpha + Math.sin(this.phase) * (this.baseAlpha * 0.55);
+      const effAlpha = Math.max(0.06, Math.min(0.95, alpha));
+
+      // Star point
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
       ctx.fillStyle = this.isCyan
-        ? `rgba(0, 240, 255, ${Math.max(0.05, alpha * 0.9)})`
-        : `rgba(255, 255, 255, ${Math.max(0.04, alpha)})`;
+        ? `rgba(0, 240, 255, ${effAlpha})`
+        : `rgba(255, 255, 255, ${effAlpha})`;
       ctx.fill();
+
+      // Subtle halo for major anchor stars
+      if (this.isMajor) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius * 2.8, 0, Math.PI * 2);
+        ctx.fillStyle = this.isCyan
+          ? `rgba(0, 240, 255, ${effAlpha * 0.14})`
+          : `rgba(255, 255, 255, ${effAlpha * 0.08})`;
+        ctx.fill();
+      }
     }
   }
 
@@ -110,9 +163,9 @@ function dismissLoader() {
       this.reset();
     }
     reset() {
-      this.x = Math.random() * (width * 0.7);
-      this.y = Math.random() * (height * 0.3);
-      this.len = Math.random() * 80 + 50;
+      this.x = Math.random() * (width * 0.65);
+      this.y = Math.random() * (height * 0.35);
+      this.len = Math.random() * 85 + 55;
       this.speed = Math.random() * 6 + 7;
       this.angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.2;
       this.alpha = 1;
@@ -148,20 +201,60 @@ function dismissLoader() {
   }
 
   for (let i = 0; i < starCount; i++) {
-    stars.push(new Star());
+    stars.push(new StarNode());
   }
 
   const meteor = new ShootingStar();
-
-  // Trigger occasional Rolls-Royce shooting star every 12-16 seconds
   setInterval(() => {
-    if (Math.random() > 0.3 && !meteor.active) meteor.trigger();
+    if (Math.random() > 0.35 && !meteor.active) meteor.trigger();
   }, 14000);
+
+  function drawConstellationLines() {
+    ctx.lineWidth = 0.65;
+    for (let i = 0; i < stars.length; i++) {
+      for (let j = i + 1; j < stars.length; j++) {
+        const dx = stars[i].x - stars[j].x;
+        const dy = stars[i].y - stars[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < connectionDist) {
+          const lineAlpha = (1 - dist / connectionDist) * 0.22;
+          const isCyanLine = stars[i].isCyan || stars[j].isCyan;
+
+          ctx.beginPath();
+          ctx.moveTo(stars[i].x, stars[i].y);
+          ctx.lineTo(stars[j].x, stars[j].y);
+          ctx.strokeStyle = isCyanLine
+            ? `rgba(0, 240, 255, ${lineAlpha * 1.2})`
+            : `rgba(255, 255, 255, ${lineAlpha})`;
+          ctx.stroke();
+        }
+      }
+
+      // Connect stars near mouse to cursor position
+      if (mouse.active) {
+        const dx = stars[i].x - mouse.x;
+        const dy = stars[i].y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < mouse.radius) {
+          const mouseLineAlpha = (1 - dist / mouse.radius) * 0.28;
+          ctx.beginPath();
+          ctx.moveTo(stars[i].x, stars[i].y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.strokeStyle = `rgba(0, 240, 255, ${mouseLineAlpha})`;
+          ctx.stroke();
+        }
+      }
+    }
+  }
 
   function loop() {
     ctx.clearRect(0, 0, width, height);
     for (let s of stars) {
       s.update();
+    }
+    drawConstellationLines();
+    for (let s of stars) {
       s.draw();
     }
     meteor.update();

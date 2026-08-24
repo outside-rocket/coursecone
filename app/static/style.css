@@ -1,75 +1,76 @@
 /* ==========================================================================
    CourseConE — Formal Monochromatic Liquid Glass Design System
-   Rolls-Royce Starlight Aesthetic · Ultra-Thin Hairlines · 2% Cyan Accent
+   Dark Constellation Canvas · Optical Glass Refraction · 2% Cyan Accent
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
    1. FORMAL MONOCHROME TOKENS (Black, White, Charcoal, 2% Cyan)
    -------------------------------------------------------------------------- */
 :root {
-  /* Rolls-Royce Deep Obsidian Void */
+  /* Deep Space Cosmic Void */
   --bg-deep: #020204;
-  --bg-void: #060609;
-  --bg-surface: #0b0b0f;
+  --bg-void: #050508;
+  --bg-surface: #0a0a0e;
   
-  /* Monochromatic Translucent Liquid Glass Tiers */
-  --glass-lvl0: rgba(10, 10, 14, 0.45);
-  --glass-lvl1: rgba(14, 14, 18, 0.65);
-  --glass-lvl2: rgba(18, 18, 24, 0.80);
-  --glass-lvl3: rgba(22, 22, 30, 0.92);
-  --glass-subtle: rgba(255, 255, 255, 0.025);
+  /* Translucent Liquid Glass Tiers (Calibrated for visible optical refraction) */
+  --glass-lvl0: rgba(8, 8, 12, 0.40);
+  --glass-lvl1: rgba(10, 10, 15, 0.54);   /* Visible constellation diffusion */
+  --glass-lvl2: rgba(14, 14, 20, 0.68);   /* Elevated cards */
+  --glass-lvl3: rgba(18, 18, 26, 0.88);   /* Floating HUD & modals */
+  --glass-subtle: rgba(255, 255, 255, 0.03);
 
   /* Ultra-Thin Minimalist Hairlines */
-  --hairline: 1px solid rgba(255, 255, 255, 0.06);
-  --hairline-subtle: 1px solid rgba(255, 255, 255, 0.035);
-  --hairline-bright: 1px solid rgba(255, 255, 255, 0.14);
+  --hairline: 1px solid rgba(255, 255, 255, 0.08);
+  --hairline-subtle: 1px solid rgba(255, 255, 255, 0.045);
+  --hairline-bright: 1px solid rgba(255, 255, 255, 0.16);
   --hairline-cyan: 1px solid rgba(0, 240, 255, 0.35);
 
-  /* Inset Physical Specular Edges */
-  --specular-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
-  --specular-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
-  --shadow-liquid: 0 16px 40px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.04);
-  --shadow-floating: 0 24px 60px -12px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  /* Inset Physical Specular Edges & Inset Highlights */
+  --specular-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+  --specular-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  --shadow-liquid: 0 16px 40px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --shadow-floating: 0 24px 60px -12px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.09);
 
   /* 2% Controlled Cyan & Monochrome Palette */
   --cyan: #00f0ff;
+  --cyan-bright: #38f8ff;
   --cyan-dim: #00a6b2;
   --cyan-subtle: rgba(0, 240, 255, 0.08);
-  --cyan-glow: 0 0 25px rgba(0, 240, 255, 0.22);
+  --cyan-glow: 0 0 25px rgba(0, 240, 255, 0.25);
 
-  /* High-Contrast Monochromatic Typography */
+  /* High-Contrast Typography */
   --text-primary: #ffffff;
   --text-secondary: #e4e4e7;
   --text-dim: #a1a1aa;
   --text-muted: #71717a;
   --text-dark: #3f3f46;
 
-  /* Subtle, Formal Timetable & State Tints (NOT Bright) */
-  --tint-theory-bg: rgba(34, 197, 94, 0.09);
-  --tint-theory-border: rgba(34, 197, 94, 0.22);
+  /* Subtle, Formal Timetable & State Tints */
+  --tint-theory-bg: rgba(34, 197, 94, 0.10);
+  --tint-theory-border: rgba(34, 197, 94, 0.25);
   --tint-theory-text: #86efac;
 
-  --tint-lab-bg: rgba(234, 179, 8, 0.09);
-  --tint-lab-border: rgba(234, 179, 8, 0.22);
+  --tint-lab-bg: rgba(234, 179, 8, 0.10);
+  --tint-lab-border: rgba(234, 179, 8, 0.25);
   --tint-lab-text: #fde047;
 
-  --tint-common-bg: rgba(16, 185, 129, 0.12);
+  --tint-common-bg: rgba(16, 185, 129, 0.14);
   --tint-common-text: #a7f3d0;
 
-  --tint-busy-bg: rgba(239, 68, 68, 0.1);
+  --tint-busy-bg: rgba(239, 68, 68, 0.12);
   --tint-busy-text: #fca5a5;
 
-  --tint-mine-bg: rgba(255, 255, 255, 0.07);
+  --tint-mine-bg: rgba(255, 255, 255, 0.08);
   --tint-mine-text: #e4e4e7;
 
-  --tint-theirs-bg: rgba(0, 240, 255, 0.09);
+  --tint-theirs-bg: rgba(0, 240, 255, 0.10);
   --tint-theirs-text: #a5f3fc;
 
   --danger: #ef4444;
 
-  /* Blur Constants */
-  --blur-base: blur(20px) saturate(140%);
-  --blur-elevated: blur(28px) saturate(150%);
+  /* Performance-Optimized Adaptive Blur */
+  --blur-base: blur(18px) saturate(150%);
+  --blur-elevated: blur(26px) saturate(160%);
   --blur-subtle: blur(10px);
 
   /* Radii & Dimensions */
@@ -124,15 +125,15 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-pill);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 /* --------------------------------------------------------------------------
-   3. ROLLS-ROYCE STARLIGHT ROOF CANVAS & MINIMALIST ATMOSPHERE
+   3. DARK CONSTELLATION CANVAS & OPTICAL DEPTH
    -------------------------------------------------------------------------- */
 #liquid-canvas {
   position: fixed;
@@ -141,11 +142,11 @@ body {
   height: 100vh;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 15%, #08080f 0%, #020204 85%);
+  background: radial-gradient(ellipse at 50% 15%, #080812 0%, #020204 90%);
 }
 
 .bg-layer, .ambient-mesh {
-  display: none !important; /* Pure Starlight Roof Aesthetic — No loud blurry colored orbs */
+  display: none !important;
 }
 
 .noise-overlay {
@@ -168,7 +169,7 @@ body {
   margin-top: -140px;
   margin-left: -140px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 240, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.045) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 70%);
   pointer-events: none;
   z-index: 2;
   filter: blur(24px);
@@ -199,7 +200,7 @@ body:hover #liquid-cursor-follower {
   transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Dynamic 2D Specular Reflection following cursor */
+/* Dynamic 2D Specular Ray Reflection following cursor */
 .glass::before,
 .liquid-glass::before,
 .glass-panel::before,
@@ -208,8 +209,8 @@ body:hover #liquid-cursor-follower {
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 255, 255, 0.05),
+    550px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.06),
     transparent 65%
   );
   pointer-events: none;
@@ -317,7 +318,7 @@ h2 {
   transform: scale(0.98);
 }
 
-/* Formal Primary Button (Monochrome with Specular Glow) */
+/* Formal Primary Button (Monochrome with Specular Top) */
 .btn-primary {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
   color: #ffffff;
@@ -332,14 +333,14 @@ h2 {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.035);
   color: var(--text-secondary);
   border: var(--hairline);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
   color: #ffffff;
 }
 
@@ -599,7 +600,7 @@ option {
   display: flex;
   flex-direction: column;
   padding: 14px 10px;
-  background: rgba(10, 10, 14, 0.82);
+  background: rgba(10, 10, 15, 0.78);
   backdrop-filter: var(--blur-elevated);
   -webkit-backdrop-filter: var(--blur-elevated);
   border: var(--hairline);
