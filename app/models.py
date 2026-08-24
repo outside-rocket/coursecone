@@ -51,6 +51,12 @@ class Student(Base):
                         primary_key=True)
     roll_no = Column(String(12), unique=True, nullable=False)
     bio = Column(Text)
+    phone = Column(String(20))
+    instagram = Column(String(60))
+    facebook = Column(String(60))
+    linkedin = Column(String(80))
+    reddit = Column(String(60))
+    dob = Column(String(10))
     person = relationship("Person", lazy="joined")
 
     @property
@@ -101,6 +107,7 @@ class ClassOffering(Base):
     course_code = Column(String(12), ForeignKey("course.course_code"), primary_key=True)
     class_id = Column(String(20), primary_key=True)
     faculty_id = Column(Integer, ForeignKey("faculty.person_id"), nullable=False)
+    slot_string = Column(String(60))              # raw compound value, e.g. "A1+TA1"
     venue = Column(String(20))
     semester_id = Column(String(10), nullable=False)
 
@@ -133,6 +140,7 @@ class Enrollment(Base):
     enrolled_at = Column(DateTime, nullable=False,
                          server_default=text("CURRENT_TIMESTAMP"))
     status = Column(String(10), default="CONFIRMED", nullable=False)
+    slot_tokens = Column(String(60))
     __table_args__ = (
         ForeignKeyConstraint(["course_code", "class_id"],
                              ["class_offering.course_code", "class_offering.class_id"],
@@ -141,12 +149,14 @@ class Enrollment(Base):
 
 
 class UserFollow(Base):
+    """Directed follow edge. status: PENDING (request sent) -> ACCEPTED."""
     __tablename__ = "user_follows"
     follower_id = Column(Integer, ForeignKey("student.student_id", ondelete="CASCADE"),
                          primary_key=True)
     following_id = Column(Integer, ForeignKey("student.student_id", ondelete="CASCADE"),
                           primary_key=True)
     followed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    status = Column(String(10), default="PENDING", nullable=False)  # PENDING | ACCEPTED
     __table_args__ = (CheckConstraint("follower_id <> following_id"),)
 
 
@@ -179,6 +189,16 @@ class SwapListing(Base):
                              ondelete="CASCADE"),
         Index("idx_listing_status", "status", "desired_course_code"),
     )
+
+
+class SwapInterest(Base):
+    """A student raising a hand for an open listing ('I want this slot')."""
+    __tablename__ = "swap_interest"
+    listing_id = Column(Integer, ForeignKey("swap_listing.listing_id", ondelete="CASCADE"),
+                        primary_key=True)
+    student_id = Column(Integer, ForeignKey("student.student_id", ondelete="CASCADE"),
+                        primary_key=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
 class SwapTransaction(Base):

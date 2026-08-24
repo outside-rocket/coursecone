@@ -12,11 +12,22 @@ ALGORITHM = "HS256"
 
 
 def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    if not password:
+        return "!"
+    pwd_bytes = password.encode("utf-8")
+    return bcrypt.hashpw(pwd_bytes, bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(password: str, hashed: str) -> bool:
-    return bcrypt.checkpw(password.encode(), hashed.encode())
+    if not password or not hashed or hashed == "!":
+        return False
+    if hashed.startswith("$2b$") or hashed.startswith("$2a$") or hashed.startswith("$2y$"):
+        try:
+            return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
+        except Exception:
+            return False
+    # Plaintext fallback for legacy unencrypted entries
+    return password == hashed
 
 
 def create_token(student_id: int) -> str:
