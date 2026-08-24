@@ -1,6 +1,6 @@
 /* ==========================================================================
    CourseConE — Formal Monochromatic Liquid Glass Client Engine
-   Rotating Blue-Green Planet Background · Optical Blur · 2% Cyan Accent
+   Photorealistic Blue-Green Planet · Optical Starfield · Smooth Blur HUD
    ========================================================================== */
 
 const $ = (s) => document.querySelector(s);
@@ -64,7 +64,7 @@ function dismissLoader() {
 }
 
 /* --------------------------------------------------------------------------
-   3. REALISTIC ROTATING BLUE-GREEN PLANET CANVAS (OFFSET TO RIGHT)
+   3. PHOTOREALISTIC ROTATING BLUE-GREEN PLANET & OPTICAL STARFIELD
    -------------------------------------------------------------------------- */
 (function initPlanetAndStarsCanvas() {
   const canvas = $("#liquid-canvas");
@@ -72,79 +72,145 @@ function dismissLoader() {
   const ctx = canvas.getContext("2d");
   let width, height;
 
-  // Offscreen Texture for Planet Surface & Rotating Atmosphere
+  // Offscreen Hi-Res Surface Texture Canvas (2048 x 1024)
+  const texW = 2048;
+  const texH = 1024;
   const textureCanvas = document.createElement("canvas");
   const tCtx = textureCanvas.getContext("2d");
-  const texW = 1200;
-  const texH = 600;
   textureCanvas.width = texW;
   textureCanvas.height = texH;
 
-  // Generate Procedural Blue-Green Earth-like Texture
-  function generatePlanetTexture() {
-    // 1. Deep Oceanic Gradient
+  // Offscreen Night-Side City Lights Texture
+  const cityCanvas = document.createElement("canvas");
+  const cCtx = cityCanvas.getContext("2d");
+  cityCanvas.width = texW;
+  cityCanvas.height = texH;
+
+  // Generate Ultra-Realistic Planet Surface, Coastlines, Mountains & Clouds
+  function generateHiResPlanetTexture() {
+    // 1. Deep Ocean Abyss with bathymetric gradient
     const oceanGrad = tCtx.createLinearGradient(0, 0, 0, texH);
-    oceanGrad.addColorStop(0, "#081d36");
-    oceanGrad.addColorStop(0.35, "#0b2b48");
-    oceanGrad.addColorStop(0.65, "#093d58");
-    oceanGrad.addColorStop(1, "#051829");
+    oceanGrad.addColorStop(0, "#041426");
+    oceanGrad.addColorStop(0.25, "#072440");
+    oceanGrad.addColorStop(0.5, "#0a3258");
+    oceanGrad.addColorStop(0.75, "#072846");
+    oceanGrad.addColorStop(1, "#03101f");
     tCtx.fillStyle = oceanGrad;
     tCtx.fillRect(0, 0, texW, texH);
 
-    // 2. Continental Landmasses (Emerald, Sage, & Coastal Cyan)
-    const continents = [
-      { x: 160, y: 180, rx: 140, ry: 90, col: "#0d5a45" },
-      { x: 210, y: 220, rx: 90, ry: 70, col: "#107c5c" },
-      { x: 420, y: 320, rx: 180, ry: 110, col: "#0b4d3b" },
-      { x: 500, y: 280, rx: 120, ry: 80, col: "#138865" },
-      { x: 740, y: 160, rx: 160, ry: 95, col: "#0e634c" },
-      { x: 820, y: 240, rx: 110, ry: 80, col: "#127558" },
-      { x: 1040, y: 340, rx: 150, ry: 100, col: "#0a4434" },
-      { x: 1120, y: 290, rx: 100, ry: 75, col: "#108563" },
+    // 2. High-Fidelity Continents & Archipelago Clusters
+    const landmasses = [
+      // Major Northern Continent
+      { x: 380, y: 320, rx: 280, ry: 170, rot: -0.15, col: "#0f5940", ridge: "#544431" },
+      { x: 490, y: 390, rx: 190, ry: 130, rot: 0.25, col: "#137554", ridge: "#6a5740" },
+      { x: 260, y: 280, rx: 140, ry: 100, rot: -0.3, col: "#0b4a34", ridge: "#4b3c2c" },
+      // Equatorial Archipelago & Subcontinents
+      { x: 780, y: 490, rx: 180, ry: 120, rot: 0.4, col: "#127c59", ridge: "#5c4934" },
+      { x: 920, y: 560, rx: 220, ry: 150, rot: -0.2, col: "#0e6447", ridge: "#4a3c2c" },
+      { x: 1050, y: 440, rx: 130, ry: 85, rot: 0.1, col: "#168c65", ridge: "#63503b" },
+      // Eastern Supercontinent
+      { x: 1420, y: 360, rx: 320, ry: 190, rot: 0.12, col: "#0d553d", ridge: "#574633" },
+      { x: 1600, y: 480, rx: 240, ry: 140, rot: -0.25, col: "#116f50", ridge: "#66523c" },
+      { x: 1280, y: 420, rx: 160, ry: 110, rot: 0.35, col: "#147e5b", ridge: "#5a4734" },
+      // Polar Ice & Glacial Shelves
+      { x: 600, y: 80, rx: 420, ry: 60, rot: 0, col: "#dff2f8", ridge: "#b8dce8" },
+      { x: 1500, y: 90, rx: 380, ry: 55, rot: 0, col: "#e8f7fb", ridge: "#c5e6f1" },
+      { x: 900, y: 960, rx: 500, ry: 55, rot: 0, col: "#e2f4f9", ridge: "#b8dbe7" }
     ];
 
-    continents.forEach(c => {
-      // Coastal shallow waters (cyan shimmer)
+    landmasses.forEach(c => {
+      // Step A: Shallow Continental Shelf & Turquoise Coral Banks (Subsurface Cyan Glow)
+      tCtx.save();
       tCtx.beginPath();
-      tCtx.ellipse(c.x, c.y, c.rx * 1.25, c.ry * 1.25, 0.2, 0, Math.PI * 2);
-      tCtx.fillStyle = "rgba(0, 240, 255, 0.18)";
+      tCtx.ellipse(c.x, c.y, c.rx * 1.35, c.ry * 1.35, c.rot, 0, Math.PI * 2);
+      tCtx.fillStyle = "rgba(0, 240, 255, 0.22)";
+      tCtx.filter = "blur(22px)";
+      tCtx.fill();
+      tCtx.restore();
+
+      // Step B: Vibrant Coastal Waters
+      tCtx.save();
+      tCtx.beginPath();
+      tCtx.ellipse(c.x, c.y, c.rx * 1.15, c.ry * 1.15, c.rot, 0, Math.PI * 2);
+      tCtx.fillStyle = "rgba(16, 185, 129, 0.35)";
       tCtx.filter = "blur(12px)";
       tCtx.fill();
+      tCtx.restore();
 
-      // Landmass core
+      // Step C: Main Continental Body
+      tCtx.save();
       tCtx.beginPath();
-      tCtx.ellipse(c.x, c.y, c.rx, c.ry, 0.1, 0, Math.PI * 2);
+      tCtx.ellipse(c.x, c.y, c.rx, c.ry, c.rot, 0, Math.PI * 2);
       tCtx.fillStyle = c.col;
       tCtx.filter = "blur(6px)";
       tCtx.fill();
+      tCtx.restore();
 
-      // Lush vegetation inner
+      // Step D: Mountain Ridges & Arid Highlands
+      tCtx.save();
       tCtx.beginPath();
-      tCtx.ellipse(c.x + 10, c.y - 5, c.rx * 0.65, c.ry * 0.65, 0, 0, Math.PI * 2);
-      tCtx.fillStyle = "rgba(34, 197, 94, 0.35)";
-      tCtx.filter = "blur(4px)";
+      tCtx.ellipse(c.x + 15, c.y - 10, c.rx * 0.45, c.ry * 0.35, c.rot + 0.1, 0, Math.PI * 2);
+      tCtx.fillStyle = c.ridge;
+      tCtx.filter = "blur(5px)";
       tCtx.fill();
+      tCtx.restore();
     });
 
-    // 3. Wispy Swirling Clouds
-    tCtx.filter = "blur(8px)";
-    for (let i = 0; i < 28; i++) {
-      const cx = (i * 45) % texW;
-      const cy = 60 + Math.sin(i * 0.8) * 180 + (i % 3) * 60;
+    // 3. Dense Multi-Layer Realistic Cloud Systems (Cyclones & Cirrus Wisps)
+    // Cloud Shadows onto terrain
+    tCtx.save();
+    tCtx.filter = "blur(10px)";
+    for (let i = 0; i < 40; i++) {
+      const cx = ((i * 58) + 12) % texW;
+      const cy = 120 + Math.sin(i * 0.65) * 260 + (i % 4) * 110;
       tCtx.beginPath();
-      tCtx.ellipse(cx, cy, 75 + (i % 4) * 25, 20 + (i % 3) * 8, (i % 2 === 0 ? 0.35 : -0.25), 0, Math.PI * 2);
-      tCtx.fillStyle = "rgba(255, 255, 255, 0.42)";
+      tCtx.ellipse(cx + 8, cy + 10, 110 + (i % 5) * 28, 26 + (i % 3) * 10, (i % 2 === 0 ? 0.3 : -0.2), 0, Math.PI * 2);
+      tCtx.fillStyle = "rgba(0, 5, 15, 0.32)";
       tCtx.fill();
     }
-    tCtx.filter = "none";
-  }
-  generatePlanetTexture();
+    tCtx.restore();
 
+    // Pure White Cloud Tops
+    tCtx.save();
+    tCtx.filter = "blur(7px)";
+    for (let i = 0; i < 40; i++) {
+      const cx = (i * 58) % texW;
+      const cy = 120 + Math.sin(i * 0.65) * 260 + (i % 4) * 110;
+      tCtx.beginPath();
+      tCtx.ellipse(cx, cy, 110 + (i % 5) * 28, 26 + (i % 3) * 10, (i % 2 === 0 ? 0.3 : -0.2), 0, Math.PI * 2);
+      tCtx.fillStyle = "rgba(255, 255, 255, 0.72)";
+      tCtx.fill();
+    }
+    // Cyclone Swirl
+    tCtx.beginPath();
+    tCtx.arc(680, 420, 95, 0, Math.PI * 2);
+    tCtx.fillStyle = "rgba(255, 255, 255, 0.65)";
+    tCtx.fill();
+    tCtx.restore();
+
+    // 4. Night-Side City Lights (Warm golden neural clusters along coastlines)
+    cCtx.fillStyle = "#000000";
+    cCtx.fillRect(0, 0, texW, texH);
+    cCtx.save();
+    cCtx.filter = "blur(1.5px)";
+    landmasses.forEach(c => {
+      for (let j = 0; j < 35; j++) {
+        const lx = c.x + (Math.random() - 0.5) * c.rx * 1.5;
+        const ly = c.y + (Math.random() - 0.5) * c.ry * 1.5;
+        cCtx.beginPath();
+        cCtx.arc(lx, ly, Math.random() * 1.4 + 0.6, 0, Math.PI * 2);
+        cCtx.fillStyle = Math.random() > 0.4 ? "rgba(255, 200, 90, 0.85)" : "rgba(255, 140, 40, 0.75)";
+        cCtx.fill();
+      }
+    });
+    cCtx.restore();
+  }
+  generateHiResPlanetTexture();
+
+  // Non-Connected Optical Starlight Array
   let stars = [];
   let shootingStars = [];
-  let mouse = { x: -1000, y: -1000, active: false, radius: 140 };
-  const starCount = window.innerWidth < 768 ? 60 : 120;
-  const connectionDist = window.innerWidth < 768 ? 95 : 120;
+  const starCount = window.innerWidth < 768 ? 90 : 180;
   let planetRotation = 0;
 
   function resize() {
@@ -154,76 +220,64 @@ function dismissLoader() {
   window.addEventListener("resize", resize);
   resize();
 
-  window.addEventListener("mousemove", (e) => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-    mouse.active = true;
-  });
-
-  window.addEventListener("mouseleave", () => {
-    mouse.active = false;
-    mouse.x = -1000;
-    mouse.y = -1000;
-  });
-
-  class StarNode {
+  class OpticalStar {
     constructor() {
       this.reset(true);
     }
     reset(initial = false) {
       this.x = Math.random() * width;
-      this.y = initial ? Math.random() * height : (Math.random() > 0.5 ? -10 : height + 10);
-      this.vx = (Math.random() - 0.5) * 0.18;
-      this.vy = (Math.random() - 0.5) * 0.18;
-      this.radius = Math.random() < 0.15 ? (Math.random() * 1.1 + 1.4) : (Math.random() * 0.8 + 0.5);
-      this.baseAlpha = Math.random() * 0.4 + 0.2;
+      this.y = initial ? Math.random() * height : (Math.random() > 0.5 ? -8 : height + 8);
+      this.vx = (Math.random() - 0.5) * 0.12;
+      this.vy = -(Math.random() * 0.15 + 0.05);
+      this.radius = Math.random() < 0.12 ? (Math.random() * 1.2 + 1.2) : (Math.random() * 0.7 + 0.35);
+      this.baseAlpha = Math.random() * 0.5 + 0.25;
       this.phase = Math.random() * Math.PI * 2;
-      this.twinkleSpeed = Math.random() * 0.018 + 0.006;
-      this.isCyan = Math.random() < 0.04;
+      this.twinkleSpeed = Math.random() * 0.02 + 0.007;
+
+      // Realistic Stellar Color Temperatures
+      const rnd = Math.random();
+      if (rnd < 0.04) this.color = "rgba(0, 240, 255, "; // 2-4% Controlled Cyan Starlight
+      else if (rnd < 0.18) this.color = "rgba(200, 235, 255, "; // Cool A-type Blue-White
+      else if (rnd < 0.30) this.color = "rgba(255, 235, 190, "; // Warm G-type Yellow-White
+      else this.color = "rgba(255, 255, 255, "; // Pure White Diamond
     }
     update() {
       this.x += this.vx;
       this.y += this.vy;
       this.phase += this.twinkleSpeed;
 
-      if (this.x < -20) this.x = width + 20;
-      if (this.x > width + 20) this.x = -20;
-      if (this.y < -20) this.y = height + 20;
-      if (this.y > height + 20) this.y = -20;
-
-      if (mouse.active) {
-        const dx = mouse.x - this.x;
-        const dy = mouse.y - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < mouse.radius && dist > 10) {
-          const force = (mouse.radius - dist) / mouse.radius;
-          this.x += (dx / dist) * force * 0.4;
-          this.y += (dy / dist) * force * 0.4;
-        }
-      }
+      if (this.x < -10) this.x = width + 10;
+      if (this.x > width + 10) this.x = -10;
+      if (this.y < -10) this.reset();
     }
     draw() {
       const alpha = this.baseAlpha + Math.sin(this.phase) * (this.baseAlpha * 0.55);
-      const effAlpha = Math.max(0.05, Math.min(0.9, alpha));
+      const effAlpha = Math.max(0.04, Math.min(0.95, alpha));
 
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = this.isCyan
-        ? `rgba(0, 240, 255, ${effAlpha})`
-        : `rgba(255, 255, 255, ${effAlpha})`;
+      ctx.fillStyle = this.color + effAlpha + ")";
       ctx.fill();
+
+      // Subtle atmospheric halo for prominent stars
+      if (this.radius > 1.4) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius * 2.8, 0, Math.PI * 2);
+        ctx.fillStyle = this.color + (effAlpha * 0.12) + ")";
+        ctx.fill();
+      }
     }
   }
 
-  class ShootingStar {
+  class MeteorStreak {
     constructor() {
       this.reset();
     }
     reset() {
-      this.x = Math.random() * (width * 0.5);
+      this.x = Math.random() * (width * 0.55);
       this.y = Math.random() * (height * 0.35);
-      this.len = Math.random() * 85 + 55;
-      this.speed = Math.random() * 6 + 7;
+      this.len = Math.random() * 90 + 60;
+      this.speed = Math.random() * 7 + 8;
       this.angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.2;
       this.alpha = 1;
       this.active = false;
@@ -236,7 +290,7 @@ function dismissLoader() {
       if (!this.active) return;
       this.x += Math.cos(this.angle) * this.speed;
       this.y += Math.sin(this.angle) * this.speed;
-      this.alpha -= 0.022;
+      this.alpha -= 0.024;
       if (this.alpha <= 0 || this.x > width || this.y > height) {
         this.active = false;
       }
@@ -247,7 +301,7 @@ function dismissLoader() {
       const tailY = this.y - Math.sin(this.angle) * this.len;
       const grad = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
       grad.addColorStop(0, "rgba(255, 255, 255, 0)");
-      grad.addColorStop(1, `rgba(255, 255, 255, ${this.alpha * 0.7})`);
+      grad.addColorStop(1, `rgba(255, 255, 255, ${this.alpha * 0.8})`);
       ctx.beginPath();
       ctx.moveTo(tailX, tailY);
       ctx.lineTo(this.x, this.y);
@@ -258,120 +312,88 @@ function dismissLoader() {
   }
 
   for (let i = 0; i < starCount; i++) {
-    stars.push(new StarNode());
+    stars.push(new OpticalStar());
   }
 
-  const meteor = new ShootingStar();
+  const meteor = new MeteorStreak();
   setInterval(() => {
     if (Math.random() > 0.35 && !meteor.active) meteor.trigger();
   }, 14000);
 
-  function drawConstellationLines() {
-    ctx.lineWidth = 0.65;
-    for (let i = 0; i < stars.length; i++) {
-      for (let j = i + 1; j < stars.length; j++) {
-        const dx = stars[i].x - stars[j].x;
-        const dy = stars[i].y - stars[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < connectionDist) {
-          const lineAlpha = (1 - dist / connectionDist) * 0.2;
-          const isCyanLine = stars[i].isCyan || stars[j].isCyan;
-
-          ctx.beginPath();
-          ctx.moveTo(stars[i].x, stars[i].y);
-          ctx.lineTo(stars[j].x, stars[j].y);
-          ctx.strokeStyle = isCyanLine
-            ? `rgba(0, 240, 255, ${lineAlpha * 1.2})`
-            : `rgba(255, 255, 255, ${lineAlpha})`;
-          ctx.stroke();
-        }
-      }
-
-      if (mouse.active) {
-        const dx = stars[i].x - mouse.x;
-        const dy = stars[i].y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < mouse.radius) {
-          const mouseLineAlpha = (1 - dist / mouse.radius) * 0.25;
-          ctx.beginPath();
-          ctx.moveTo(stars[i].x, stars[i].y);
-          ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = `rgba(0, 240, 255, ${mouseLineAlpha})`;
-          ctx.stroke();
-        }
-      }
-    }
-  }
-
-  // Draw the Realistic Rotating Blue-Green Planet Offset to the Right
-  function drawPlanet() {
+  // Draw Photorealistic Rotating Blue-Green Planet Offset to the Right
+  function drawPhotorealisticPlanet() {
     const isMobile = width < 768;
-    const planetRadius = Math.min(width, height) * (isMobile ? 0.65 : 0.58);
-    const planetX = width * (isMobile ? 0.92 : 0.86);
-    const planetY = height * 0.52;
+    const planetRadius = Math.min(width, height) * (isMobile ? 0.66 : 0.58);
+    const planetX = width * (isMobile ? 0.94 : 0.88);
+    const planetY = height * 0.50;
 
-    // Slow rotation speed
-    planetRotation = (planetRotation + 0.16) % texW;
+    planetRotation = (planetRotation + 0.14) % texW;
 
-    // 1. Outer Atmospheric Corona Glow (Cyan & Emerald limb radiance)
-    const coronaGrad = ctx.createRadialGradient(
+    // 1. Multi-Stage Outer Rayleigh Atmospheric Corona (Cyan & Emerald Haze)
+    const outerAtmosphere = ctx.createRadialGradient(
       planetX - planetRadius * 0.35, planetY - planetRadius * 0.35, planetRadius * 0.75,
-      planetX, planetY, planetRadius * 1.22
+      planetX, planetY, planetRadius * 1.25
     );
-    coronaGrad.addColorStop(0, "rgba(0, 240, 255, 0.0)");
-    coronaGrad.addColorStop(0.78, "rgba(0, 240, 255, 0.08)");
-    coronaGrad.addColorStop(0.92, "rgba(16, 185, 129, 0.14)");
-    coronaGrad.addColorStop(1, "rgba(0, 240, 255, 0)");
+    outerAtmosphere.addColorStop(0, "rgba(0, 240, 255, 0)");
+    outerAtmosphere.addColorStop(0.76, "rgba(0, 240, 255, 0.05)");
+    outerAtmosphere.addColorStop(0.88, "rgba(16, 185, 129, 0.16)");
+    outerAtmosphere.addColorStop(0.96, "rgba(0, 240, 255, 0.30)");
+    outerAtmosphere.addColorStop(1, "rgba(0, 240, 255, 0)");
 
     ctx.save();
     ctx.beginPath();
-    ctx.arc(planetX, planetY, planetRadius * 1.22, 0, Math.PI * 2);
-    ctx.fillStyle = coronaGrad;
+    ctx.arc(planetX, planetY, planetRadius * 1.25, 0, Math.PI * 2);
+    ctx.fillStyle = outerAtmosphere;
     ctx.fill();
     ctx.restore();
 
-    // 2. Planet Sphere Clip
+    // 2. Planet Globe Sphere Clip
     ctx.save();
     ctx.beginPath();
     ctx.arc(planetX, planetY, planetRadius, 0, Math.PI * 2);
     ctx.clip();
 
-    // 3. Draw Rotating Surface Texture Map
+    // 3. Draw Seamless Rotating Surface Texture with Spherical Width
     const sx = Math.floor(planetRotation);
-    const drawW = planetRadius * 2.2;
-    const drawH = planetRadius * 2.2;
-    const drawX = planetX - planetRadius * 1.1;
-    const drawY = planetY - planetRadius * 1.1;
+    const drawW = planetRadius * 2.25;
+    const drawH = planetRadius * 2.25;
+    const drawX = planetX - planetRadius * 1.12;
+    const drawY = planetY - planetRadius * 1.12;
 
-    // Two-pass draw for seamless infinite wrap
-    ctx.drawImage(textureCanvas, sx, 0, texW - sx, texH, drawX, drawY, (texW - sx) / texW * drawW * 1.8, drawH);
-    ctx.drawImage(textureCanvas, 0, 0, sx, texH, drawX + (texW - sx) / texW * drawW * 1.8, drawY, sx / texW * drawW * 1.8, drawH);
+    ctx.drawImage(textureCanvas, sx, 0, texW - sx, texH, drawX, drawY, ((texW - sx) / texW) * drawW * 1.8, drawH);
+    ctx.drawImage(textureCanvas, 0, 0, sx, texH, drawX + ((texW - sx) / texW) * drawW * 1.8, drawY, (sx / texW) * drawW * 1.8, drawH);
 
-    // 4. Photorealistic 3D Sunlight & Shadow Terminator
-    // Light source coming from top-right
+    // 4. Night-Side City Lights Map
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+    ctx.drawImage(cityCanvas, sx, 0, texW - sx, texH, drawX, drawY, ((texW - sx) / texW) * drawW * 1.8, drawH);
+    ctx.drawImage(cityCanvas, 0, 0, sx, texH, drawX + ((texW - sx) / texW) * drawW * 1.8, drawY, (sx / texW) * drawW * 1.8, drawH);
+    ctx.restore();
+
+    // 5. Accurate 3D Sunlight & Night Terminator Shadow with Twilight Penumbra
     const shadowGrad = ctx.createRadialGradient(
-      planetX + planetRadius * 0.35, planetY - planetRadius * 0.35, planetRadius * 0.15,
-      planetX - planetRadius * 0.25, planetY + planetRadius * 0.25, planetRadius * 1.05
+      planetX + planetRadius * 0.38, planetY - planetRadius * 0.38, planetRadius * 0.12,
+      planetX - planetRadius * 0.30, planetY + planetRadius * 0.30, planetRadius * 1.08
     );
     shadowGrad.addColorStop(0, "rgba(255, 255, 255, 0.0)");
-    shadowGrad.addColorStop(0.45, "rgba(0, 10, 20, 0.25)");
-    shadowGrad.addColorStop(0.72, "rgba(0, 4, 10, 0.72)");
-    shadowGrad.addColorStop(0.95, "rgba(0, 0, 0, 0.94)");
+    shadowGrad.addColorStop(0.40, "rgba(0, 8, 16, 0.18)");
+    shadowGrad.addColorStop(0.68, "rgba(240, 100, 40, 0.06)"); // Soft golden Rayleigh twilight rim
+    shadowGrad.addColorStop(0.76, "rgba(0, 3, 8, 0.78)");
+    shadowGrad.addColorStop(0.94, "rgba(0, 0, 0, 0.96)");
     shadowGrad.addColorStop(1, "#000000");
 
     ctx.fillStyle = shadowGrad;
     ctx.fillRect(planetX - planetRadius, planetY - planetRadius, planetRadius * 2, planetRadius * 2);
 
-    // 5. Atmospheric Rim Scatter (Fresnel limb illumination)
+    // 6. Atmospheric Fresnel Rim (Illuminated Crescent Limb)
     const rimGrad = ctx.createRadialGradient(
-      planetX, planetY, planetRadius * 0.88,
+      planetX, planetY, planetRadius * 0.86,
       planetX, planetY, planetRadius
     );
     rimGrad.addColorStop(0, "rgba(0, 240, 255, 0)");
-    rimGrad.addColorStop(0.7, "rgba(16, 185, 129, 0.18)");
-    rimGrad.addColorStop(0.95, "rgba(0, 240, 255, 0.55)");
-    rimGrad.addColorStop(1, "rgba(255, 255, 255, 0.85)");
+    rimGrad.addColorStop(0.75, "rgba(16, 185, 129, 0.18)");
+    rimGrad.addColorStop(0.94, "rgba(0, 240, 255, 0.65)");
+    rimGrad.addColorStop(1, "rgba(255, 255, 255, 0.95)");
 
     ctx.fillStyle = rimGrad;
     ctx.fillRect(planetX - planetRadius, planetY - planetRadius, planetRadius * 2, planetRadius * 2);
@@ -380,21 +402,18 @@ function dismissLoader() {
   }
 
   function loop() {
-    // Pure Pitch Black Base
+    // Pure Pitch Black Deep Cosmic Void
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, width, height);
 
-    // Stars in Deep Space
+    // Non-Connected Optical Stars in Deep Space
     for (let s of stars) {
       s.update();
-    }
-    drawConstellationLines();
-    for (let s of stars) {
       s.draw();
     }
 
-    // Realistic Rotating Blue-Green Planet on the Right
-    drawPlanet();
+    // Photorealistic Rotating Blue-Green Terrestrial Planet
+    drawPhotorealisticPlanet();
 
     meteor.update();
     meteor.draw();
