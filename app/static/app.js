@@ -72,7 +72,7 @@ function dismissLoader() {
   let width, height;
   let particles = [];
   const count = window.innerWidth < 768 ? 35 : 75;
-  let mouse = { x: -1000, y: -1000, radius: 120 };
+  let mouse = { x: -1000, y: -1000, radius: 130 };
 
   function resize() {
     width = canvas.width = window.innerWidth;
@@ -96,8 +96,8 @@ function dismissLoader() {
       this.size = Math.random() * 1.8 + 0.6;
       this.baseX = this.x;
       this.baseY = this.y;
-      this.vx = (Math.random() - 0.5) * 0.3;
-      this.vy = -(Math.random() * 0.4 + 0.2);
+      this.vx = (Math.random() - 0.5) * 0.35;
+      this.vy = -(Math.random() * 0.45 + 0.2);
       this.alpha = Math.random() * 0.5 + 0.2;
       this.color = Math.random() > 0.6 ? "rgba(0, 240, 255, " : "rgba(168, 85, 247, ";
     }
@@ -105,14 +105,14 @@ function dismissLoader() {
       this.x += this.vx;
       this.y += this.vy;
 
-      // Mouse subtle deflection
+      // Subtle mouse deflection
       const dx = mouse.x - this.x;
       const dy = mouse.y - this.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       if (dist < mouse.radius) {
         const force = (mouse.radius - dist) / mouse.radius;
-        this.x -= (dx / dist) * force * 2.2;
-        this.y -= (dy / dist) * force * 2.2;
+        this.x -= (dx / dist) * force * 2.4;
+        this.y -= (dy / dist) * force * 2.4;
       }
 
       if (this.y < -10 || this.x < -10 || this.x > width + 10) {
@@ -154,7 +154,7 @@ function dismissLoader() {
     targetX = e.clientX;
     targetY = e.clientY;
 
-    // Specular light sweep on hovered cards/panels
+    // Specular ray highlight coordinates for glass surfaces
     const hoveredElement = e.target.closest(".glass, .liquid-glass, .card, .panel, .btn");
     if (hoveredElement) {
       const rect = hoveredElement.getBoundingClientRect();
@@ -185,8 +185,8 @@ function dismissLoader() {
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -4;
-    const rotateY = ((x - centerX) / centerX) * 4;
+    const rotateX = ((y - centerY) / centerY) * -4.5;
+    const rotateY = ((x - centerX) / centerX) * 4.5;
 
     card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
   });
