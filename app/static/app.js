@@ -1,6 +1,6 @@
 /* ==========================================================================
    CourseConE — Formal Monochromatic Liquid Glass Client Engine
-   Photorealistic Blue-Green Planet · Optical Starfield · Smooth Blur HUD
+   Photorealistic Blue-Green Planet · Blinking Optical Stars (Zero Threads)
    ========================================================================== */
 
 const $ = (s) => document.querySelector(s);
@@ -64,9 +64,9 @@ function dismissLoader() {
 }
 
 /* --------------------------------------------------------------------------
-   3. PHOTOREALISTIC ROTATING BLUE-GREEN PLANET & OPTICAL STARFIELD
+   3. REALISTIC ROTATING PLANET & BLINKING STARS (ZERO LINES / ZERO THREADS)
    -------------------------------------------------------------------------- */
-(function initPlanetAndStarsCanvas() {
+(function initPlanetAndBlinkingStars() {
   const canvas = $("#liquid-canvas");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
@@ -86,7 +86,7 @@ function dismissLoader() {
   cityCanvas.width = texW;
   cityCanvas.height = texH;
 
-  // Generate Ultra-Realistic Planet Surface, Coastlines, Mountains & Clouds
+  // Generate Realistic Planet Surface, Coastlines, Mountains & Clouds
   function generateHiResPlanetTexture() {
     // 1. Deep Ocean Abyss with bathymetric gradient
     const oceanGrad = tCtx.createLinearGradient(0, 0, 0, texH);
@@ -207,10 +207,9 @@ function dismissLoader() {
   }
   generateHiResPlanetTexture();
 
-  // Non-Connected Optical Starlight Array
+  // Pure Blinking Optical Stars (No Threads, No Lines, Natural Scintillation)
   let stars = [];
-  let shootingStars = [];
-  const starCount = window.innerWidth < 768 ? 90 : 180;
+  const starCount = window.innerWidth < 768 ? 100 : 200;
   let planetRotation = 0;
 
   function resize() {
@@ -220,105 +219,67 @@ function dismissLoader() {
   window.addEventListener("resize", resize);
   resize();
 
-  class OpticalStar {
+  class BlinkingStar {
     constructor() {
-      this.reset(true);
-    }
-    reset(initial = false) {
       this.x = Math.random() * width;
-      this.y = initial ? Math.random() * height : (Math.random() > 0.5 ? -8 : height + 8);
-      this.vx = (Math.random() - 0.5) * 0.12;
-      this.vy = -(Math.random() * 0.15 + 0.05);
-      this.radius = Math.random() < 0.12 ? (Math.random() * 1.2 + 1.2) : (Math.random() * 0.7 + 0.35);
-      this.baseAlpha = Math.random() * 0.5 + 0.25;
+      this.y = Math.random() * height;
+      this.baseRadius = Math.random() < 0.12 ? (Math.random() * 0.9 + 1.2) : (Math.random() * 0.55 + 0.4);
+      this.baseBrightness = Math.random() * 0.4 + 0.4;
       this.phase = Math.random() * Math.PI * 2;
-      this.twinkleSpeed = Math.random() * 0.02 + 0.007;
+      this.blinkSpeed = Math.random() * 0.035 + 0.015;
+      this.isMajor = this.baseRadius > 1.3;
 
-      // Realistic Stellar Color Temperatures
+      // Realistic Spectral Stellar Tints
       const rnd = Math.random();
-      if (rnd < 0.04) this.color = "rgba(0, 240, 255, "; // 2-4% Controlled Cyan Starlight
-      else if (rnd < 0.18) this.color = "rgba(200, 235, 255, "; // Cool A-type Blue-White
-      else if (rnd < 0.30) this.color = "rgba(255, 235, 190, "; // Warm G-type Yellow-White
-      else this.color = "rgba(255, 255, 255, "; // Pure White Diamond
+      if (rnd < 0.04) {
+        this.colorR = 0; this.colorG = 240; this.colorB = 255; // 2% Controlled Cyan
+      } else if (rnd < 0.22) {
+        this.colorR = 210; this.colorG = 240; this.colorB = 255; // Cool Blue-White
+      } else if (rnd < 0.40) {
+        this.colorR = 255; this.colorG = 230; this.colorB = 180; // Warm Amber-White
+      } else {
+        this.colorR = 255; this.colorG = 255; this.colorB = 255; // Pure Diamond White
+      }
     }
     update() {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.phase += this.twinkleSpeed;
-
-      if (this.x < -10) this.x = width + 10;
-      if (this.x > width + 10) this.x = -10;
-      if (this.y < -10) this.reset();
+      this.phase += this.blinkSpeed;
     }
     draw() {
-      const alpha = this.baseAlpha + Math.sin(this.phase) * (this.baseAlpha * 0.55);
-      const effAlpha = Math.max(0.04, Math.min(0.95, alpha));
+      // Atmospheric scintillation: Multi-frequency harmonic blinking
+      const s1 = Math.sin(this.phase);
+      const s2 = Math.sin(this.phase * 2.3);
+      const s3 = Math.cos(this.phase * 0.7);
+      const twinkle = Math.max(0.02, Math.min(1.0, Math.pow(((s1 + s2 * 0.5 + s3 * 0.3) / 1.8 + 0.5), 1.9)));
+      const alpha = this.baseBrightness * twinkle;
 
+      // Draw Star Core
       ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = this.color + effAlpha + ")";
+      ctx.arc(this.x, this.y, this.baseRadius * (0.8 + twinkle * 0.3), 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${this.colorR}, ${this.colorG}, ${this.colorB}, ${alpha})`;
       ctx.fill();
 
-      // Subtle atmospheric halo for prominent stars
-      if (this.radius > 1.4) {
+      // Soft Optical Halo for prominent blinking stars
+      if (this.isMajor && alpha > 0.4) {
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius * 2.8, 0, Math.PI * 2);
-        ctx.fillStyle = this.color + (effAlpha * 0.12) + ")";
+        ctx.arc(this.x, this.y, this.baseRadius * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.colorR}, ${this.colorG}, ${this.colorB}, ${alpha * 0.16})`;
         ctx.fill();
-      }
-    }
-  }
 
-  class MeteorStreak {
-    constructor() {
-      this.reset();
-    }
-    reset() {
-      this.x = Math.random() * (width * 0.55);
-      this.y = Math.random() * (height * 0.35);
-      this.len = Math.random() * 90 + 60;
-      this.speed = Math.random() * 7 + 8;
-      this.angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.2;
-      this.alpha = 1;
-      this.active = false;
-    }
-    trigger() {
-      this.reset();
-      this.active = true;
-    }
-    update() {
-      if (!this.active) return;
-      this.x += Math.cos(this.angle) * this.speed;
-      this.y += Math.sin(this.angle) * this.speed;
-      this.alpha -= 0.024;
-      if (this.alpha <= 0 || this.x > width || this.y > height) {
-        this.active = false;
+        // Delicate 4-point optical diffraction cross when star is at peak scintillation
+        if (alpha > 0.6) {
+          const spikeLen = this.baseRadius * 4.5 * (alpha - 0.4);
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, spikeLen * 0.2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.25})`;
+          ctx.fill();
+        }
       }
-    }
-    draw() {
-      if (!this.active) return;
-      const tailX = this.x - Math.cos(this.angle) * this.len;
-      const tailY = this.y - Math.sin(this.angle) * this.len;
-      const grad = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
-      grad.addColorStop(0, "rgba(255, 255, 255, 0)");
-      grad.addColorStop(1, `rgba(255, 255, 255, ${this.alpha * 0.8})`);
-      ctx.beginPath();
-      ctx.moveTo(tailX, tailY);
-      ctx.lineTo(this.x, this.y);
-      ctx.strokeStyle = grad;
-      ctx.lineWidth = 1;
-      ctx.stroke();
     }
   }
 
   for (let i = 0; i < starCount; i++) {
-    stars.push(new OpticalStar());
+    stars.push(new BlinkingStar());
   }
-
-  const meteor = new MeteorStreak();
-  setInterval(() => {
-    if (Math.random() > 0.35 && !meteor.active) meteor.trigger();
-  }, 14000);
 
   // Draw Photorealistic Rotating Blue-Green Planet Offset to the Right
   function drawPhotorealisticPlanet() {
@@ -402,11 +363,11 @@ function dismissLoader() {
   }
 
   function loop() {
-    // Pure Pitch Black Deep Cosmic Void
+    // Pure Pitch Black Deep Space Base
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, width, height);
 
-    // Non-Connected Optical Stars in Deep Space
+    // Realistic Blinking Stars (Zero Threads / Zero Lines)
     for (let s of stars) {
       s.update();
       s.draw();
@@ -415,8 +376,6 @@ function dismissLoader() {
     // Photorealistic Rotating Blue-Green Terrestrial Planet
     drawPhotorealisticPlanet();
 
-    meteor.update();
-    meteor.draw();
     requestAnimationFrame(loop);
   }
   loop();
