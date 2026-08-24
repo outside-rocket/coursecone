@@ -1,6 +1,6 @@
 /* ==========================================================================
    CourseConE — Formal Monochromatic Liquid Glass Client Engine
-   Pure Pitch Black Background · Floating Liquid Glass Lens · 2% Cyan Accent
+   Pure Pitch Black Background · Smooth Optical Blur Transitions · 2% Cyan Accent
    ========================================================================== */
 
 const $ = (s) => document.querySelector(s);
@@ -34,8 +34,9 @@ function toast(msg, err = false) {
   if (!t) return;
   t.textContent = msg;
   t.className = "toast" + (err ? " err" : "");
+  t.classList.remove("toast-hidden");
   clearTimeout(t._h);
-  t._h = setTimeout(() => t.classList.add("hidden"), 3400);
+  t._h = setTimeout(() => t.classList.add("toast-hidden"), 3400);
 }
 
 function esc(s) {
@@ -57,7 +58,7 @@ function dismissLoader() {
   if (loader) {
     setTimeout(() => {
       loader.classList.add("fade-out");
-      setTimeout(() => loader.remove(), 550);
+      setTimeout(() => loader.remove(), 600);
     }, 380);
   }
 }
@@ -109,20 +110,18 @@ function dismissLoader() {
       this.phase = Math.random() * Math.PI * 2;
       this.twinkleSpeed = Math.random() * 0.018 + 0.006;
       this.isMajor = this.radius > 1.8;
-      this.isCyan = Math.random() < 0.035; // 2% controlled subtle cyan constellation anchors
+      this.isCyan = Math.random() < 0.035;
     }
     update() {
       this.x += this.vx;
       this.y += this.vy;
       this.phase += this.twinkleSpeed;
 
-      // Soft boundary wraparound
       if (this.x < -20) this.x = width + 20;
       if (this.x > width + 20) this.x = -20;
       if (this.y < -20) this.y = height + 20;
       if (this.y > height + 20) this.y = -20;
 
-      // Subtle mouse nexus attraction
       if (mouse.active) {
         const dx = mouse.x - this.x;
         const dy = mouse.y - this.y;
@@ -246,7 +245,6 @@ function dismissLoader() {
   }
 
   function loop() {
-    // Pure pitch black clear
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, width, height);
 
@@ -310,15 +308,12 @@ function positionFloatingLens(targetEl, data) {
   const lensWidth = lens.offsetWidth || 330;
   const lensHeight = lens.offsetHeight || 110;
 
-  // Position above the hovered cell
   let x = rect.left + (rect.width / 2) - (lensWidth / 2);
   let y = rect.top - lensHeight - 12;
 
-  // Clamp within viewport
   if (x < 14) x = 14;
   if (x + lensWidth > window.innerWidth - 14) x = window.innerWidth - lensWidth - 14;
   if (y < 14) {
-    // If not enough room above, flip below the slot
     y = rect.bottom + 12;
   }
 
@@ -339,7 +334,7 @@ function hideFloatingLens() {
 }
 
 /* --------------------------------------------------------------------------
-   6. COMMAND PALETTE HUD (Cmd+K)
+   6. COMMAND PALETTE HUD (Cmd+K) (SMOOTH OPTICAL BLUR IN)
    -------------------------------------------------------------------------- */
 (function initCommandPalette() {
   const palette = $("#command-palette-backdrop");
@@ -349,24 +344,25 @@ function hideFloatingLens() {
 
   function openPalette() {
     if (!palette) return;
-    palette.classList.remove("hidden");
+    palette.classList.add("active");
     if (input) {
       input.value = "";
-      input.focus();
+      setTimeout(() => input.focus(), 60);
     }
   }
 
   function closePalette() {
-    if (palette) palette.classList.add("hidden");
+    if (palette) palette.classList.remove("active");
   }
 
   window.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
       e.preventDefault();
-      palette && palette.classList.contains("hidden") ? openPalette() : closePalette();
+      palette && palette.classList.contains("active") ? closePalette() : openPalette();
     } else if (e.key === "Escape") {
       closePalette();
       hideFloatingLens();
+      $("#menu-dropdown")?.classList.remove("active");
     }
   });
 
@@ -440,7 +436,6 @@ $("#register-form")?.addEventListener("submit", async (e) => {
   }
 });
 
-// Demo Evaluator Login buttons
 $("#btn-demo-1")?.addEventListener("click", () => {
   $("#li-email").value = "22bce0001@vitstudent.ac.in";
   $("#li-pass").value = "password123";
@@ -462,13 +457,13 @@ if (menuBtn) {
     e.stopPropagation();
     const dd = $("#menu-dropdown");
     if (dd && dd.parentNode !== document.body) document.body.appendChild(dd);
-    dd.classList.toggle("hidden");
+    dd.classList.toggle("active");
   });
 }
 
 document.addEventListener("click", (e) => {
   if (!e.target.closest(".menu-wrap") && $("#menu-dropdown")) {
-    $("#menu-dropdown").classList.add("hidden");
+    $("#menu-dropdown").classList.remove("active");
   }
   if (!e.target.closest("#app-sidebar") && !e.target.closest("#mobile-nav-toggle")) {
     $("#app-sidebar")?.classList.remove("mobile-open");
@@ -501,6 +496,7 @@ if (logoutBtn) {
     TOKEN = null; ME = null;
     localStorage.removeItem("cp_token");
     sessionStorage.removeItem("cp_token");
+    $("#menu-dropdown")?.classList.remove("active");
     $("#app-view").classList.add("hidden");
     $("#auth-view").classList.remove("hidden");
     toast("Signed out");
@@ -677,7 +673,6 @@ async function loadGrid() {
   }
   if ($("#grid-table")) $("#grid-table").innerHTML = html;
 
-  // Bind Floating Liquid Glass Lens directly above hovered cell
   $$("#grid-table td.occ").forEach((td) => {
     const tipEl = td.querySelector(".tt-tip");
     if (!tipEl) return;
@@ -698,7 +693,6 @@ async function loadGrid() {
     });
   });
 
-  // Hide floating lens if scrolling timetable
   $(".table-wrap")?.addEventListener("scroll", hideFloatingLens);
 }
 
