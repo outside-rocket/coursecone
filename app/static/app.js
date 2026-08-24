@@ -1,6 +1,6 @@
 /* ==========================================================================
    CourseConE — Formal Monochromatic Liquid Glass Client Engine
-   Photorealistic Blue-Green Planet · Blinking Optical Stars (Zero Threads)
+   Planetary Spatial Menu · Scroll-Driven Orbit · Apple-Style Translucent Greeting
    ========================================================================== */
 
 const $ = (s) => document.querySelector(s);
@@ -8,7 +8,8 @@ const $$ = (s) => document.querySelectorAll(s);
 const API = "";
 let TOKEN = localStorage.getItem("cp_token") || sessionStorage.getItem("cp_token") || null;
 let ME = null;
-let CURRENT_VIEW = "timetable";
+let CURRENT_VIEW = "home";
+let IN_PLANETARY_MODE = true;
 
 const PALETTE = [
   "#a1a1aa", "#71717a", "#e4e4e7", "#d4d4d8",
@@ -50,6 +51,17 @@ function avatarColor(name) {
   return PALETTE[h % PALETTE.length];
 }
 
+function getGreeting(rawName) {
+  const hour = new Date().getHours();
+  const firstName = (rawName || "Student").trim().split(" ")[0];
+  let timeStr = "Good evening";
+  if (hour >= 5 && hour < 12) timeStr = "Good morning";
+  else if (hour >= 12 && hour < 17) timeStr = "Good afternoon";
+  else if (hour >= 17 && hour < 23) timeStr = "Good evening";
+  else timeStr = "Good night";
+  return `${timeStr}, ${firstName}`;
+}
+
 /* --------------------------------------------------------------------------
    2. LIQUID INTRO LOADER
    -------------------------------------------------------------------------- */
@@ -64,8 +76,13 @@ function dismissLoader() {
 }
 
 /* --------------------------------------------------------------------------
-   3. REALISTIC ROTATING PLANET & BLINKING STARS (ZERO LINES / ZERO THREADS)
+   3. REALISTIC ROTATING PLANET & BLINKING STARS (SCROLL ROTATION ENGINE)
    -------------------------------------------------------------------------- */
+let planetRotation = 0;
+let scrollTargetRotation = 0;
+let isDraggingPlanet = false;
+let dragStartX = 0;
+
 (function initPlanetAndBlinkingStars() {
   const canvas = $("#liquid-canvas");
   if (!canvas) return;
@@ -100,26 +117,22 @@ function dismissLoader() {
 
     // 2. High-Fidelity Continents & Archipelago Clusters
     const landmasses = [
-      // Major Northern Continent
       { x: 380, y: 320, rx: 280, ry: 170, rot: -0.15, col: "#0f5940", ridge: "#544431" },
       { x: 490, y: 390, rx: 190, ry: 130, rot: 0.25, col: "#137554", ridge: "#6a5740" },
       { x: 260, y: 280, rx: 140, ry: 100, rot: -0.3, col: "#0b4a34", ridge: "#4b3c2c" },
-      // Equatorial Archipelago & Subcontinents
       { x: 780, y: 490, rx: 180, ry: 120, rot: 0.4, col: "#127c59", ridge: "#5c4934" },
       { x: 920, y: 560, rx: 220, ry: 150, rot: -0.2, col: "#0e6447", ridge: "#4a3c2c" },
       { x: 1050, y: 440, rx: 130, ry: 85, rot: 0.1, col: "#168c65", ridge: "#63503b" },
-      // Eastern Supercontinent
       { x: 1420, y: 360, rx: 320, ry: 190, rot: 0.12, col: "#0d553d", ridge: "#574633" },
       { x: 1600, y: 480, rx: 240, ry: 140, rot: -0.25, col: "#116f50", ridge: "#66523c" },
       { x: 1280, y: 420, rx: 160, ry: 110, rot: 0.35, col: "#147e5b", ridge: "#5a4734" },
-      // Polar Ice & Glacial Shelves
       { x: 600, y: 80, rx: 420, ry: 60, rot: 0, col: "#dff2f8", ridge: "#b8dce8" },
       { x: 1500, y: 90, rx: 380, ry: 55, rot: 0, col: "#e8f7fb", ridge: "#c5e6f1" },
       { x: 900, y: 960, rx: 500, ry: 55, rot: 0, col: "#e2f4f9", ridge: "#b8dbe7" }
     ];
 
     landmasses.forEach(c => {
-      // Step A: Shallow Continental Shelf & Turquoise Coral Banks (Subsurface Cyan Glow)
+      // Step A: Shallow Continental Shelf & Turquoise Coral Banks
       tCtx.save();
       tCtx.beginPath();
       tCtx.ellipse(c.x, c.y, c.rx * 1.35, c.ry * 1.35, c.rot, 0, Math.PI * 2);
@@ -157,7 +170,6 @@ function dismissLoader() {
     });
 
     // 3. Dense Multi-Layer Realistic Cloud Systems (Cyclones & Cirrus Wisps)
-    // Cloud Shadows onto terrain
     tCtx.save();
     tCtx.filter = "blur(10px)";
     for (let i = 0; i < 40; i++) {
@@ -181,14 +193,13 @@ function dismissLoader() {
       tCtx.fillStyle = "rgba(255, 255, 255, 0.72)";
       tCtx.fill();
     }
-    // Cyclone Swirl
     tCtx.beginPath();
     tCtx.arc(680, 420, 95, 0, Math.PI * 2);
     tCtx.fillStyle = "rgba(255, 255, 255, 0.65)";
     tCtx.fill();
     tCtx.restore();
 
-    // 4. Night-Side City Lights (Warm golden neural clusters along coastlines)
+    // 4. Night-Side City Lights
     cCtx.fillStyle = "#000000";
     cCtx.fillRect(0, 0, texW, texH);
     cCtx.save();
@@ -207,10 +218,9 @@ function dismissLoader() {
   }
   generateHiResPlanetTexture();
 
-  // Pure Blinking Optical Stars (No Threads, No Lines, Natural Scintillation)
+  // Pure Blinking Optical Stars (Zero Threads / Zero Lines)
   let stars = [];
   const starCount = window.innerWidth < 768 ? 100 : 200;
-  let planetRotation = 0;
 
   function resize() {
     width = canvas.width = window.innerWidth;
@@ -229,43 +239,38 @@ function dismissLoader() {
       this.blinkSpeed = Math.random() * 0.035 + 0.015;
       this.isMajor = this.baseRadius > 1.3;
 
-      // Realistic Spectral Stellar Tints
       const rnd = Math.random();
       if (rnd < 0.04) {
-        this.colorR = 0; this.colorG = 240; this.colorB = 255; // 2% Controlled Cyan
+        this.colorR = 0; this.colorG = 240; this.colorB = 255;
       } else if (rnd < 0.22) {
-        this.colorR = 210; this.colorG = 240; this.colorB = 255; // Cool Blue-White
+        this.colorR = 210; this.colorG = 240; this.colorB = 255;
       } else if (rnd < 0.40) {
-        this.colorR = 255; this.colorG = 230; this.colorB = 180; // Warm Amber-White
+        this.colorR = 255; this.colorG = 230; this.colorB = 180;
       } else {
-        this.colorR = 255; this.colorG = 255; this.colorB = 255; // Pure Diamond White
+        this.colorR = 255; this.colorG = 255; this.colorB = 255;
       }
     }
     update() {
       this.phase += this.blinkSpeed;
     }
     draw() {
-      // Atmospheric scintillation: Multi-frequency harmonic blinking
       const s1 = Math.sin(this.phase);
       const s2 = Math.sin(this.phase * 2.3);
       const s3 = Math.cos(this.phase * 0.7);
       const twinkle = Math.max(0.02, Math.min(1.0, Math.pow(((s1 + s2 * 0.5 + s3 * 0.3) / 1.8 + 0.5), 1.9)));
       const alpha = this.baseBrightness * twinkle;
 
-      // Draw Star Core
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.baseRadius * (0.8 + twinkle * 0.3), 0, Math.PI * 2);
       ctx.fillStyle = `rgba(${this.colorR}, ${this.colorG}, ${this.colorB}, ${alpha})`;
       ctx.fill();
 
-      // Soft Optical Halo for prominent blinking stars
       if (this.isMajor && alpha > 0.4) {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.baseRadius * 2.5, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${this.colorR}, ${this.colorG}, ${this.colorB}, ${alpha * 0.16})`;
         ctx.fill();
 
-        // Delicate 4-point optical diffraction cross when star is at peak scintillation
         if (alpha > 0.6) {
           const spikeLen = this.baseRadius * 4.5 * (alpha - 0.4);
           ctx.beginPath();
@@ -281,6 +286,31 @@ function dismissLoader() {
     stars.push(new BlinkingStar());
   }
 
+  // Scroll & Drag to Rotate Planet in Planetary Spatial Mode
+  window.addEventListener("wheel", (e) => {
+    if (IN_PLANETARY_MODE) {
+      scrollTargetRotation += e.deltaY * 0.0022;
+    }
+  }, { passive: true });
+
+  window.addEventListener("pointerdown", (e) => {
+    if (IN_PLANETARY_MODE && !e.target.closest(".orbital-node-card, .btn, input")) {
+      isDraggingPlanet = true;
+      dragStartX = e.clientX;
+    }
+  });
+
+  window.addEventListener("pointermove", (e) => {
+    if (isDraggingPlanet && IN_PLANETARY_MODE) {
+      const deltaX = e.clientX - dragStartX;
+      dragStartX = e.clientX;
+      scrollTargetRotation -= deltaX * 0.006;
+    }
+  });
+
+  window.addEventListener("pointerup", () => { isDraggingPlanet = false; });
+  window.addEventListener("pointercancel", () => { isDraggingPlanet = false; });
+
   // Draw Photorealistic Rotating Blue-Green Planet Offset to the Right
   function drawPhotorealisticPlanet() {
     const isMobile = width < 768;
@@ -288,7 +318,11 @@ function dismissLoader() {
     const planetX = width * (isMobile ? 0.94 : 0.88);
     const planetY = height * 0.50;
 
-    planetRotation = (planetRotation + 0.14) % texW;
+    // Smooth rotation interpolation
+    scrollTargetRotation += 0.0012; // Natural slow drift
+    planetRotation += (scrollTargetRotation - planetRotation) * 0.08;
+
+    const currentPxRotation = (Math.abs(planetRotation * 400)) % texW;
 
     // 1. Multi-Stage Outer Rayleigh Atmospheric Corona (Cyan & Emerald Haze)
     const outerAtmosphere = ctx.createRadialGradient(
@@ -315,7 +349,7 @@ function dismissLoader() {
     ctx.clip();
 
     // 3. Draw Seamless Rotating Surface Texture with Spherical Width
-    const sx = Math.floor(planetRotation);
+    const sx = Math.floor(currentPxRotation);
     const drawW = planetRadius * 2.25;
     const drawH = planetRadius * 2.25;
     const drawX = planetX - planetRadius * 1.12;
@@ -338,7 +372,7 @@ function dismissLoader() {
     );
     shadowGrad.addColorStop(0, "rgba(255, 255, 255, 0.0)");
     shadowGrad.addColorStop(0.40, "rgba(0, 8, 16, 0.18)");
-    shadowGrad.addColorStop(0.68, "rgba(240, 100, 40, 0.06)"); // Soft golden Rayleigh twilight rim
+    shadowGrad.addColorStop(0.68, "rgba(240, 100, 40, 0.06)");
     shadowGrad.addColorStop(0.76, "rgba(0, 3, 8, 0.78)");
     shadowGrad.addColorStop(0.94, "rgba(0, 0, 0, 0.96)");
     shadowGrad.addColorStop(1, "#000000");
@@ -360,20 +394,53 @@ function dismissLoader() {
     ctx.fillRect(planetX - planetRadius, planetY - planetRadius, planetRadius * 2, planetRadius * 2);
 
     ctx.restore();
+
+    // Update Floating Orbital Capsules on the Planet Surface
+    updateOrbitalNodesPositions(planetX, planetY, planetRadius);
+  }
+
+  function updateOrbitalNodesPositions(px, py, pr) {
+    if (!IN_PLANETARY_MODE) return;
+    const cards = $$(".orbital-node-card");
+    const total = cards.length;
+    const isMobile = width < 768;
+    const orbitRadiusX = pr * (isMobile ? 0.78 : 0.82);
+    const orbitRadiusY = pr * (isMobile ? 0.78 : 0.82);
+
+    cards.forEach((card, i) => {
+      const baseAngle = (i / total) * (Math.PI * 2);
+      const angle = baseAngle + (planetRotation * 1.8);
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+
+      // Node sits on facing orbital cylinder/sphere
+      const x = px + (sin * orbitRadiusX) - 110;
+      const y = py + (cos * orbitRadiusY) - 24;
+      const zDepth = cos; // 1 = front, -1 = back
+
+      if (zDepth > -0.28) {
+        const scale = 0.82 + 0.28 * Math.max(0, zDepth);
+        const opacity = Math.min(1.0, Math.max(0, (zDepth + 0.28) * 1.5));
+        card.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0) scale(${scale.toFixed(3)})`;
+        card.style.opacity = opacity.toFixed(3);
+        card.style.pointerEvents = opacity > 0.4 ? "auto" : "none";
+        card.style.zIndex = String(Math.round(30 + zDepth * 20));
+      } else {
+        card.style.opacity = "0";
+        card.style.pointerEvents = "none";
+      }
+    });
   }
 
   function loop() {
-    // Pure Pitch Black Deep Space Base
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, width, height);
 
-    // Realistic Blinking Stars (Zero Threads / Zero Lines)
     for (let s of stars) {
       s.update();
       s.draw();
     }
 
-    // Photorealistic Rotating Blue-Green Terrestrial Planet
     drawPhotorealisticPlanet();
 
     requestAnimationFrame(loop);
@@ -393,7 +460,7 @@ function dismissLoader() {
     targetX = e.clientX;
     targetY = e.clientY;
 
-    const hoveredElement = e.target.closest(".glass, .liquid-glass, .card, .panel, .btn");
+    const hoveredElement = e.target.closest(".glass, .liquid-glass, .card, .panel, .btn, .orbital-node-card");
     if (hoveredElement) {
       const rect = hoveredElement.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -498,7 +565,12 @@ function hideFloatingLens() {
       if (!item) return;
       const action = item.dataset.action;
       if (action && action.startsWith("view:")) {
-        showView(action.split(":")[1]);
+        const targetView = action.split(":")[1];
+        if (targetView === "home") {
+          openPlanetaryHome();
+        } else {
+          openAppView(targetView);
+        }
         closePalette();
       }
     });
@@ -568,8 +640,65 @@ $("#btn-demo-2")?.addEventListener("click", () => {
 });
 
 /* --------------------------------------------------------------------------
-   8. NAVIGATION & DOCK MANAGEMENT
+   8. PLANETARY SPATIAL NAVIGATION & SWITCHING
    -------------------------------------------------------------------------- */
+function openPlanetaryHome() {
+  IN_PLANETARY_MODE = true;
+  CURRENT_VIEW = "home";
+  hideFloatingLens();
+
+  $("#app-view")?.classList.add("in-planetary-mode");
+  $("#planetary-home-view")?.classList.remove("hidden-spatial");
+  $("#app-sidebar")?.classList.add("planetary-hidden");
+  $$(".view").forEach((v) => v.classList.add("hidden"));
+
+  // Update greeting text dynamically
+  if ($("#home-greeting-text")) {
+    $("#home-greeting-text").textContent = getGreeting(ME ? ME.name : "Varun");
+  }
+
+  $$(".nav-btn[data-view]").forEach((b) =>
+    b.classList.toggle("active", b.dataset.view === "home"));
+}
+
+function openAppView(viewName) {
+  IN_PLANETARY_MODE = false;
+  CURRENT_VIEW = viewName;
+  hideFloatingLens();
+
+  $("#app-view")?.classList.remove("in-planetary-mode");
+  $("#planetary-home-view")?.classList.add("hidden-spatial");
+  $("#app-sidebar")?.classList.remove("planetary-hidden");
+
+  $$(".nav-btn[data-view]").forEach((b) =>
+    b.classList.toggle("active", b.dataset.view === viewName));
+  $$(".view").forEach((v) => v.classList.add("hidden"));
+
+  const viewEl = $("#view-" + viewName);
+  if (viewEl) viewEl.classList.remove("hidden");
+  $("#app-sidebar")?.classList.remove("mobile-open");
+
+  if (viewName === "timetable") loadGrid();
+  if (viewName === "classmates") { findClassmates(); loadRequests(); }
+  if (viewName === "social") { loadSocial(); loadRequests(); }
+  if (viewName === "compare") loadCompare();
+  if (viewName === "profile") loadProfile();
+  if (viewName === "swap") { loadSwap(); searchMarket(); }
+}
+
+// Click on Logo returns to Planetary Spatial Mode
+$("#sidebar-brand-home-btn")?.addEventListener("click", () => {
+  openPlanetaryHome();
+});
+
+// Click on Orbital Destination Nodes on Planet
+$$(".orbital-node-card").forEach((card) => {
+  card.addEventListener("click", () => {
+    const target = card.dataset.targetView;
+    if (target) openAppView(target);
+  });
+});
+
 const menuBtn = $("#menu-btn");
 if (menuBtn) {
   menuBtn.addEventListener("click", (e) => {
@@ -632,29 +761,28 @@ async function enterApp(token) {
   if ($("#sidebar-user-name")) $("#sidebar-user-name").textContent = ME.name ? ME.name.split(" ")[0] : "Account";
   $("#auth-view").classList.add("hidden");
   $("#app-view").classList.remove("hidden");
-  showView("timetable");
-  toast(`Signed in as ${ME.name} ✦`);
+
+  // Initial page: Interactive Planetary Spatial Mode
+  openPlanetaryHome();
+  toast(`Welcome, ${ME.name} ✦`);
 }
 
 $$(".nav-btn[data-view]").forEach((btn) =>
-  btn.addEventListener("click", () => showView(btn.dataset.view)));
+  btn.addEventListener("click", () => {
+    const viewName = btn.dataset.view;
+    if (viewName === "home") {
+      openPlanetaryHome();
+    } else {
+      openAppView(viewName);
+    }
+  }));
 
 function showView(name) {
-  CURRENT_VIEW = name;
-  hideFloatingLens();
-  $$(".nav-btn[data-view]").forEach((b) =>
-    b.classList.toggle("active", b.dataset.view === name));
-  $$(".view").forEach((v) => v.classList.add("hidden"));
-  const viewEl = $("#view-" + name);
-  if (viewEl) viewEl.classList.remove("hidden");
-  $("#app-sidebar")?.classList.remove("mobile-open");
-
-  if (name === "timetable") loadGrid();
-  if (name === "classmates") { findClassmates(); loadRequests(); }
-  if (name === "social") { loadSocial(); loadRequests(); }
-  if (name === "compare") loadCompare();
-  if (name === "profile") loadProfile();
-  if (name === "swap") { loadSwap(); searchMarket(); }
+  if (name === "home") {
+    openPlanetaryHome();
+  } else {
+    openAppView(name);
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -739,7 +867,7 @@ if (uploadBtn) {
       } else {
         toast(`Synchronized ${res.saved_courses.length} courses successfully ✦`);
       }
-      showView("timetable");
+      openAppView("timetable");
     } catch (err) {
       toast(err.message, true);
     }

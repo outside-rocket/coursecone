@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CourseConE — Academic Intelligence &amp; Slot Trading Hub</title>
-  <link rel="stylesheet" href="/static/style.css?v=3.5">
+  <link rel="stylesheet" href="/static/style.css?v=4.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=Playfair+Display:ital,wght@1,600;1,700;1,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,600;1,700;1,800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -56,6 +56,9 @@
       <span class="cp-item-key">ESC</span>
     </div>
     <div class="cp-results-list" id="cp-results-list">
+      <div class="cp-item" data-action="view:home">
+        <span>🪐 Planetary Spatial Mode</span><span class="cp-item-key">H</span>
+      </div>
       <div class="cp-item" data-action="view:timetable">
         <span>📅 Weekly Timetable Matrix</span><span class="cp-item-key">1</span>
       </div>
@@ -142,14 +145,99 @@
 </main>
 
 <!-- ============ MAIN APPLICATION VIEW ============ -->
-<div id="app-view" class="hidden">
+<div id="app-view" class="hidden in-planetary-mode">
   <!-- Mobile Nav Trigger -->
   <button id="mobile-nav-toggle" class="mobile-nav-toggle" aria-label="Toggle navigation">☰</button>
 
-  <!-- Left Navigation Dock -->
-  <aside id="app-sidebar" class="sidebar">
+  <!-- ============ PLANETARY SPATIAL HOME MODE ============ -->
+  <section id="planetary-home-view">
+    <!-- Left Hero Greeting (Apple-like Cursive Translucent Typography) -->
+    <div class="planetary-hero-left">
+      <div class="home-brand-mini-row">
+        <span class="home-brand-mini-mark">▲</span>
+        <span class="home-brand-mini-text">COURSECONE</span>
+      </div>
+
+      <h1 class="home-greeting-heading" id="home-greeting-text">Good Evening, Varun</h1>
+      <p class="home-subcaption">Academic schedule synchronization &amp; autonomous 2PL ACID slot marketplace.</p>
+
+      <div class="home-scroll-hint">
+        <span class="orbit-icon">⟳</span>
+        <span>Scroll to orbit planet · Click destination to enter</span>
+      </div>
+    </div>
+
+    <!-- Right Planetary Orbital Nodes Container -->
+    <div id="planetary-orbital-nodes">
+      <div class="orbital-node-card glass-elevated" data-target-view="timetable" data-index="0">
+        <span class="orbital-node-icon">📅</span>
+        <div class="orbital-node-info">
+          <span class="orbital-node-title">Timetable Matrix</span>
+          <span class="orbital-node-desc">5-Day Theory &amp; Lab Grid</span>
+        </div>
+        <span class="orbital-node-badge">1</span>
+      </div>
+
+      <div class="orbital-node-card glass-elevated" data-target-view="upload" data-index="1">
+        <span class="orbital-node-icon">➕</span>
+        <div class="orbital-node-info">
+          <span class="orbital-node-title">Add Courses</span>
+          <span class="orbital-node-desc">FFCS Portal Synchronization</span>
+        </div>
+        <span class="orbital-node-badge">2</span>
+      </div>
+
+      <div class="orbital-node-card glass-elevated" data-target-view="classmates" data-index="2">
+        <span class="orbital-node-icon">👥</span>
+        <div class="orbital-node-info">
+          <span class="orbital-node-title">Classmate Radar</span>
+          <span class="orbital-node-desc">Enrolled Peers Match</span>
+        </div>
+        <span class="orbital-node-badge">3</span>
+      </div>
+
+      <div class="orbital-node-card glass-elevated" data-target-view="social" data-index="3">
+        <span class="orbital-node-icon">⚡</span>
+        <div class="orbital-node-info">
+          <span class="orbital-node-title">Social &amp; Network</span>
+          <span class="orbital-node-desc">Mutuals &amp; Follow Requests</span>
+        </div>
+        <span class="orbital-node-badge">4</span>
+      </div>
+
+      <div class="orbital-node-card glass-elevated" data-target-view="compare" data-index="4">
+        <span class="orbital-node-icon">🔄</span>
+        <div class="orbital-node-info">
+          <span class="orbital-node-title">Compare Timetables</span>
+          <span class="orbital-node-desc">Visual Overlap &amp; Free Slots</span>
+        </div>
+        <span class="orbital-node-badge">5</span>
+      </div>
+
+      <div class="orbital-node-card glass-elevated" data-target-view="swap" data-index="5">
+        <span class="orbital-node-icon">⇄</span>
+        <div class="orbital-node-info">
+          <span class="orbital-node-title">Slot Marketplace</span>
+          <span class="orbital-node-desc">ACID 2PL Exchange Trading</span>
+        </div>
+        <span class="orbital-node-badge">6</span>
+      </div>
+
+      <div class="orbital-node-card glass-elevated" data-target-view="profile" data-index="6">
+        <span class="orbital-node-icon">👤</span>
+        <div class="orbital-node-info">
+          <span class="orbital-node-title">Student Profile</span>
+          <span class="orbital-node-desc">Identity &amp; Social Links</span>
+        </div>
+        <span class="orbital-node-badge">7</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Left Navigation Dock (Hidden on planetary home, slides in when view active) -->
+  <aside id="app-sidebar" class="sidebar planetary-hidden">
     <div class="sidebar-top">
-      <div class="sidebar-brand">
+      <div class="sidebar-brand" id="sidebar-brand-home-btn" title="Return to Planetary Spatial Mode">
         <span class="logo-mark">▲</span>
         <span class="logo-text">CourseConE</span>
       </div>
@@ -162,6 +250,10 @@
 
     <!-- Navigation Tabs -->
     <nav class="nav-tabs" id="nav-tabs">
+      <button class="nav-btn" data-view="home" title="Planetary Spatial Home">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+        <span class="nav-label">Planetary Orbit</span>
+      </button>
       <button class="nav-btn active" data-view="timetable" title="Timetable Matrix">
         <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
         <span class="nav-label">Timetable</span>
@@ -497,6 +589,6 @@
   </div> <!-- end app-content-wrapper -->
 </div>
 
-<script src="/static/app.js?v=3.5"></script>
+<script src="/static/app.js?v=4.0"></script>
 </body>
 </html>

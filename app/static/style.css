@@ -1,6 +1,6 @@
 /* ==========================================================================
    CourseConE — Formal Monochromatic Liquid Glass Design System
-   Pure Pitch Black Background · Smooth Optical Blur Transitions · 2% Cyan Accent
+   Planetary Spatial Menu · Pure Pitch Black · Apple-Style Translucent Greeting
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -102,7 +102,7 @@
 html {
   background-color: var(--bg-deep);
   color: var(--text-primary);
-  font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Plus Jakarta Sans", "Inter", sans-serif;
   scroll-behavior: smooth;
   min-height: 100%;
 }
@@ -233,10 +233,10 @@ body:hover #liquid-cursor-follower {
 }
 
 /* --------------------------------------------------------------------------
-   5. FORMAL TYPOGRAPHY
+   5. FORMAL TYPOGRAPHY & APPLE-STYLE GREETING
    -------------------------------------------------------------------------- */
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+  font-family: -apple-system, "SF Pro Display", "Plus Jakarta Sans", sans-serif;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--text-primary);
@@ -284,7 +284,204 @@ h2 {
 }
 
 /* --------------------------------------------------------------------------
-   6. FORMAL BUTTONS & REFINED CONTROLS
+   6. PLANETARY SPATIAL HOME VIEW (APPLE-STYLE TRANSLUCENT CURSIVE GREETING)
+   -------------------------------------------------------------------------- */
+#planetary-home-view {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  align-items: center;
+  padding: 40px 60px;
+  pointer-events: none;
+  transition: opacity 0.4s var(--ease-out), filter 0.4s var(--ease-out), visibility 0.4s;
+}
+
+#planetary-home-view.hidden-spatial {
+  opacity: 0;
+  visibility: hidden;
+  filter: blur(10px);
+  pointer-events: none !important;
+}
+
+/* Left Greeting & Minimal Brand Container */
+.planetary-hero-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  pointer-events: auto;
+  user-select: none;
+  z-index: 30;
+}
+
+.home-brand-mini-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 4px 12px 4px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.035);
+  border: var(--hairline-subtle);
+}
+
+.home-brand-mini-mark {
+  font-size: 10px;
+  font-weight: 800;
+  color: #000000;
+  background: #ffffff;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-brand-mini-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* Apple-like Bold Cursive / Italic Translucent Greeting */
+.home-greeting-heading {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Playfair Display", "Plus Jakarta Sans", serif;
+  font-weight: 800;
+  font-style: italic;
+  font-size: clamp(42px, 5.2vw, 68px);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.40) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  margin-top: 4px;
+}
+
+.home-subcaption {
+  font-size: 14px;
+  color: var(--text-dim);
+  font-weight: 400;
+  line-height: 1.5;
+  max-width: 380px;
+}
+
+.home-scroll-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(14, 14, 14, 0.65);
+  backdrop-filter: var(--blur-base);
+  border: var(--hairline-cyan);
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 500;
+  width: fit-content;
+  box-shadow: 0 4px 16px rgba(0, 240, 255, 0.08);
+}
+
+.home-scroll-hint .orbit-icon {
+  animation: rotateIcon 4s linear infinite;
+  display: inline-block;
+  font-size: 14px;
+}
+
+@keyframes rotateIcon {
+  to { transform: rotate(360deg); }
+}
+
+/* Right Planetary Orbital Nodes Surface */
+#planetary-orbital-nodes {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Floating Liquid Glass Orbital Menu Capsule */
+.orbital-node-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  min-width: 220px;
+  background: rgba(14, 14, 14, 0.78);
+  backdrop-filter: var(--blur-elevated);
+  -webkit-backdrop-filter: var(--blur-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  transition: transform 0.2s var(--ease-out), 
+              border-color 0.2s var(--ease-out), 
+              box-shadow 0.2s var(--ease-out),
+              background 0.2s var(--ease-out);
+  will-change: transform, opacity;
+  z-index: 40;
+}
+
+.orbital-node-card:hover {
+  transform: scale(1.08) !important;
+  background: rgba(20, 20, 20, 0.92);
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.95), 0 0 24px rgba(0, 240, 255, 0.25);
+}
+
+.orbital-node-card:active {
+  transform: scale(1.02) !important;
+}
+
+.orbital-node-icon {
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbital-node-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.orbital-node-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.orbital-node-desc {
+  font-size: 10.5px;
+  color: var(--text-dim);
+}
+
+.orbital-node-badge {
+  font-size: 9.5px;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   7. FORMAL BUTTONS & REFINED CONTROLS
    -------------------------------------------------------------------------- */
 .btn {
   display: inline-flex;
@@ -400,7 +597,7 @@ h2 {
 }
 
 /* --------------------------------------------------------------------------
-   7. FORMAL INPUTS & CONTROLS
+   8. FORMAL INPUTS & CONTROLS
    -------------------------------------------------------------------------- */
 input, textarea, select {
   width: 100%;
@@ -450,7 +647,7 @@ option {
 }
 
 /* --------------------------------------------------------------------------
-   8. HERO / AUTH VIEW
+   9. HERO / AUTH VIEW
    -------------------------------------------------------------------------- */
 .center-screen {
   min-height: 100vh;
@@ -501,7 +698,7 @@ option {
 }
 
 .logo {
-  font-family: "Outfit", sans-serif;
+  font-family: -apple-system, "SF Pro Display", sans-serif;
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -579,7 +776,7 @@ option {
 }
 
 /* --------------------------------------------------------------------------
-   9. FORMAL FLOATING NAVIGATION DOCK
+   10. FLOATING NAVIGATION DOCK (SLIDES IN WHEN VIEW ACTIVE, HIDDEN ON HOME)
    -------------------------------------------------------------------------- */
 #app-sidebar.sidebar {
   position: fixed;
@@ -597,8 +794,15 @@ option {
   border: var(--hairline);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-floating), var(--specular-top);
-  transition: width 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+  transform: translateX(0);
+  transition: width 0.3s var(--ease-out), transform 0.35s var(--ease-out), opacity 0.35s var(--ease-out);
   overflow: hidden;
+}
+
+#app-sidebar.sidebar.planetary-hidden {
+  transform: translateX(-120%) !important;
+  opacity: 0;
+  pointer-events: none;
 }
 
 #app-sidebar.sidebar.collapsed {
@@ -622,6 +826,14 @@ option {
   gap: 8px;
   overflow: hidden;
   white-space: nowrap;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.sidebar-brand:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .logo-mark {
@@ -639,7 +851,7 @@ option {
 }
 
 .logo-text {
-  font-family: "Outfit", sans-serif;
+  font-family: -apple-system, "SF Pro Display", sans-serif;
   font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -852,17 +1064,22 @@ option {
 }
 
 /* --------------------------------------------------------------------------
-   10. CONTENT WRAPPER & SILKY VIEW TRANSITIONS
+   11. CONTENT WRAPPER & SILKY VIEW TRANSITIONS
    -------------------------------------------------------------------------- */
 .app-content-wrapper {
   margin-left: calc(var(--sidebar-w) + 22px);
   margin-right: 20px;
   padding-top: 14px;
   padding-bottom: 30px;
-  transition: margin-left 0.3s var(--ease-out);
+  transition: margin-left 0.35s var(--ease-out), opacity 0.35s var(--ease-out);
   min-height: calc(100vh - 28px);
   position: relative;
   z-index: 5;
+}
+
+#app-view.in-planetary-mode .app-content-wrapper {
+  margin-left: 20px;
+  display: none;
 }
 
 #app-view.sidebar-collapsed .app-content-wrapper {
@@ -924,7 +1141,7 @@ option {
 }
 
 /* --------------------------------------------------------------------------
-   11. TIMETABLE MATRIX & FLOATING LIQUID GLASS TOOLTIP LENS
+   12. TIMETABLE MATRIX & FLOATING LIQUID GLASS TOOLTIP LENS
    -------------------------------------------------------------------------- */
 .tt-wrap {
   max-width: min(1780px, 98vw);
@@ -1169,7 +1386,7 @@ td.occ small {
 }
 
 /* --------------------------------------------------------------------------
-   12. SPLIT LAYOUTS (CLASSMATES, SOCIAL, MARKET)
+   13. SPLIT LAYOUTS (CLASSMATES, SOCIAL, MARKET)
    -------------------------------------------------------------------------- */
 .split-layout {
   display: grid;
@@ -1324,7 +1541,7 @@ td.occ small {
 }
 
 /* --------------------------------------------------------------------------
-   13. SOCIAL NETWORK & COMPARE
+   14. SOCIAL NETWORK & COMPARE
    -------------------------------------------------------------------------- */
 .stat-col {
   display: grid;
@@ -1342,7 +1559,7 @@ td.occ small {
 }
 
 .stat .n {
-  font-family: "Outfit", sans-serif;
+  font-family: -apple-system, "SF Pro Display", sans-serif;
   font-size: 20px;
   font-weight: 600;
   color: #ffffff;
@@ -1483,7 +1700,7 @@ td.occ small {
 .cmp-free { color: rgba(255, 255, 255, 0.15); }
 
 /* --------------------------------------------------------------------------
-   14. PROFILE & SOCIAL LINKS
+   15. PROFILE & SOCIAL LINKS
    -------------------------------------------------------------------------- */
 .profile-grid {
   display: grid;
@@ -1519,7 +1736,7 @@ td.occ small {
 }
 
 /* --------------------------------------------------------------------------
-   15. COMMAND PALETTE & SEARCH BAR (SMOOTH OPTICAL BLUR IN TRANSITION)
+   16. COMMAND PALETTE & SEARCH BAR (SMOOTH OPTICAL BLUR IN TRANSITION)
    -------------------------------------------------------------------------- */
 #command-palette-backdrop {
   position: fixed;
@@ -1680,7 +1897,7 @@ td.occ small {
 
 .loader-text {
   margin-top: 18px;
-  font-family: "Outfit", sans-serif;
+  font-family: -apple-system, "SF Pro Display", sans-serif;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -1689,9 +1906,14 @@ td.occ small {
 }
 
 /* --------------------------------------------------------------------------
-   16. RESPONSIVE DESIGN
+   17. RESPONSIVE DESIGN
    -------------------------------------------------------------------------- */
 @media (max-width: 1024px) {
+  #planetary-home-view {
+    grid-template-columns: 1fr;
+    padding: 30px 24px;
+    align-content: space-between;
+  }
   .split-layout { grid-template-columns: 1fr; }
   .side-nav { position: static; }
   .profile-grid { grid-template-columns: 1fr; }
@@ -1715,7 +1937,9 @@ td.occ small {
   }
 
   #app-sidebar.sidebar.mobile-open {
-    transform: translateX(0);
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 
   .mobile-nav-toggle {
