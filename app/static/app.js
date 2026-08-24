@@ -1,6 +1,6 @@
 /* ==========================================================================
-   CourseConE — Exotic Liquid Glass UI Client Engine
-   Vanilla JS · 60 FPS Physics · Cursor Refraction · Full ACID Integration
+   CourseConE — Formal Monochromatic Liquid Glass Client Engine
+   Rolls-Royce Starlight Roof · 2% Cyan Accent · Flat 2D Precision
    ========================================================================== */
 
 const $ = (s) => document.querySelector(s);
@@ -11,8 +11,8 @@ let ME = null;
 let CURRENT_VIEW = "timetable";
 
 const PALETTE = [
-  "#a855f7", "#00f0ff", "#ff9440", "#10b981",
-  "#ec4899", "#6366f1", "#3b82f6", "#f59e0b"
+  "#a1a1aa", "#71717a", "#e4e4e7", "#d4d4d8",
+  "#00f0ff", "#38bdf8", "#52525b", "#94a3b8"
 ];
 
 /* --------------------------------------------------------------------------
@@ -50,29 +50,29 @@ function avatarColor(name) {
 }
 
 /* --------------------------------------------------------------------------
-   2. LIQUID INTRO LOADER SEQUENCE
+   2. LIQUID INTRO LOADER
    -------------------------------------------------------------------------- */
 function dismissLoader() {
   const loader = $("#liquid-loader-screen");
   if (loader) {
     setTimeout(() => {
       loader.classList.add("fade-out");
-      setTimeout(() => loader.remove(), 650);
-    }, 450);
+      setTimeout(() => loader.remove(), 550);
+    }, 380);
   }
 }
 
 /* --------------------------------------------------------------------------
-   3. BACKGROUND LIQUID STARDUST CANVAS
+   3. ROLLS-ROYCE STARLIGHT ROOF CANVAS (Fiber-Optic Night Sky)
    -------------------------------------------------------------------------- */
-(function initLiquidCanvas() {
+(function initStarlightRoof() {
   const canvas = $("#liquid-canvas");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
   let width, height;
-  let particles = [];
-  const count = window.innerWidth < 768 ? 35 : 75;
-  let mouse = { x: -1000, y: -1000, radius: 130 };
+  let stars = [];
+  let shootingStars = [];
+  const starCount = window.innerWidth < 768 ? 90 : 180;
 
   function resize() {
     width = canvas.width = window.innerWidth;
@@ -81,69 +81,98 @@ function dismissLoader() {
   window.addEventListener("resize", resize);
   resize();
 
-  window.addEventListener("mousemove", (e) => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-  });
-
-  class Particle {
+  class Star {
     constructor() {
-      this.reset(true);
-    }
-    reset(initial = false) {
       this.x = Math.random() * width;
-      this.y = initial ? Math.random() * height : height + 10;
-      this.size = Math.random() * 1.8 + 0.6;
-      this.baseX = this.x;
-      this.baseY = this.y;
-      this.vx = (Math.random() - 0.5) * 0.35;
-      this.vy = -(Math.random() * 0.45 + 0.2);
-      this.alpha = Math.random() * 0.5 + 0.2;
-      this.color = Math.random() > 0.6 ? "rgba(0, 240, 255, " : "rgba(168, 85, 247, ";
+      this.y = Math.random() * height;
+      this.radius = Math.random() * 1.1 + 0.35; // Pinpoint optical fiber sizes
+      this.baseAlpha = Math.random() * 0.45 + 0.15;
+      this.phase = Math.random() * Math.PI * 2;
+      this.twinkleSpeed = Math.random() * 0.02 + 0.006;
+      this.isCyan = Math.random() < 0.025; // 2% subtle cyan starlight dots
     }
     update() {
-      this.x += this.vx;
-      this.y += this.vy;
-
-      // Subtle mouse deflection
-      const dx = mouse.x - this.x;
-      const dy = mouse.y - this.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < mouse.radius) {
-        const force = (mouse.radius - dist) / mouse.radius;
-        this.x -= (dx / dist) * force * 2.4;
-        this.y -= (dy / dist) * force * 2.4;
-      }
-
-      if (this.y < -10 || this.x < -10 || this.x > width + 10) {
-        this.reset();
-      }
+      this.phase += this.twinkleSpeed;
     }
     draw() {
+      const alpha = this.baseAlpha + Math.sin(this.phase) * (this.baseAlpha * 0.85);
       ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fillStyle = this.color + this.alpha + ")";
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.isCyan
+        ? `rgba(0, 240, 255, ${Math.max(0.05, alpha * 0.9)})`
+        : `rgba(255, 255, 255, ${Math.max(0.04, alpha)})`;
       ctx.fill();
     }
   }
 
-  for (let i = 0; i < count; i++) {
-    particles.push(new Particle());
+  class ShootingStar {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.x = Math.random() * (width * 0.7);
+      this.y = Math.random() * (height * 0.3);
+      this.len = Math.random() * 80 + 50;
+      this.speed = Math.random() * 6 + 7;
+      this.angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.2;
+      this.alpha = 1;
+      this.active = false;
+    }
+    trigger() {
+      this.reset();
+      this.active = true;
+    }
+    update() {
+      if (!this.active) return;
+      this.x += Math.cos(this.angle) * this.speed;
+      this.y += Math.sin(this.angle) * this.speed;
+      this.alpha -= 0.022;
+      if (this.alpha <= 0 || this.x > width || this.y > height) {
+        this.active = false;
+      }
+    }
+    draw() {
+      if (!this.active) return;
+      const tailX = this.x - Math.cos(this.angle) * this.len;
+      const tailY = this.y - Math.sin(this.angle) * this.len;
+      const grad = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
+      grad.addColorStop(0, "rgba(255, 255, 255, 0)");
+      grad.addColorStop(1, `rgba(255, 255, 255, ${this.alpha * 0.7})`);
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(this.x, this.y);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
   }
+
+  for (let i = 0; i < starCount; i++) {
+    stars.push(new Star());
+  }
+
+  const meteor = new ShootingStar();
+
+  // Trigger occasional Rolls-Royce shooting star every 12-16 seconds
+  setInterval(() => {
+    if (Math.random() > 0.3 && !meteor.active) meteor.trigger();
+  }, 14000);
 
   function loop() {
     ctx.clearRect(0, 0, width, height);
-    for (let p of particles) {
-      p.update();
-      p.draw();
+    for (let s of stars) {
+      s.update();
+      s.draw();
     }
+    meteor.update();
+    meteor.draw();
     requestAnimationFrame(loop);
   }
   loop();
 })();
 
 /* --------------------------------------------------------------------------
-   4. LIQUID CURSOR ORB & SPECULAR RAY REFRACTION
+   4. CURSOR REFRACTION & 2D SPECULAR TRACKING
    -------------------------------------------------------------------------- */
 (function initCursorAndRefraction() {
   const orb = $("#liquid-cursor-follower");
@@ -154,7 +183,6 @@ function dismissLoader() {
     targetX = e.clientX;
     targetY = e.clientY;
 
-    // Specular ray highlight coordinates for glass surfaces
     const hoveredElement = e.target.closest(".glass, .liquid-glass, .card, .panel, .btn");
     if (hoveredElement) {
       const rect = hoveredElement.getBoundingClientRect();
@@ -174,50 +202,34 @@ function dismissLoader() {
     requestAnimationFrame(renderOrb);
   }
   renderOrb();
-
-  // Dynamic 3D Card Tilt Physics
-  document.addEventListener("mousemove", (e) => {
-    const card = e.target.closest(".card, .glass.panel, .auth-card");
-    if (!card || window.innerWidth < 768) return;
-
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -4.5;
-    const rotateY = ((x - centerX) / centerX) * 4.5;
-
-    card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
-  });
-
-  document.addEventListener("mouseout", (e) => {
-    const card = e.target.closest(".card, .glass.panel, .auth-card");
-    if (card) {
-      card.style.transform = "";
-    }
-  });
-
-  // Magnetic CTA Button & Tactile Ripple Wave
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".btn");
-    if (!btn) return;
-
-    const rect = btn.getBoundingClientRect();
-    const ripple = document.createElement("span");
-    ripple.className = "btn-ripple";
-    const diameter = Math.max(rect.width, rect.height);
-    const radius = diameter / 2;
-    ripple.style.width = ripple.style.height = `${diameter}px`;
-    ripple.style.left = `${e.clientX - rect.left - radius}px`;
-    ripple.style.top = `${e.clientY - rect.top - radius}px`;
-    btn.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 700);
-  });
 })();
 
 /* --------------------------------------------------------------------------
-   5. COMMAND PALETTE HUD (Cmd+K)
+   5. EXPANDED SLOT DETAIL INSPECTOR (Hover / Click HUD)
+   -------------------------------------------------------------------------- */
+let inspectorTimer = null;
+
+function showSlotInspector(data) {
+  const insp = $("#slot-detail-inspector");
+  if (!insp) return;
+
+  $("#insp-course-title").textContent = `${data.course_code || ""} — ${data.course_title || "Course Slot"}`;
+  $("#insp-slot-token").textContent = data.slot_token || data.token || "—";
+  $("#insp-venue").textContent = data.venue || "TBD";
+  $("#insp-faculty").textContent = data.faculty || "TBD";
+
+  insp.classList.add("visible");
+}
+
+function hideSlotInspector() {
+  const insp = $("#slot-detail-inspector");
+  if (insp) insp.classList.remove("visible");
+}
+
+$("#insp-close-btn")?.addEventListener("click", hideSlotInspector);
+
+/* --------------------------------------------------------------------------
+   6. COMMAND PALETTE HUD (Cmd+K)
    -------------------------------------------------------------------------- */
 (function initCommandPalette() {
   const palette = $("#command-palette-backdrop");
@@ -244,13 +256,11 @@ function dismissLoader() {
       palette && palette.classList.contains("hidden") ? openPalette() : closePalette();
     } else if (e.key === "Escape") {
       closePalette();
+      hideSlotInspector();
     }
   });
 
-  if (quickPaletteBtn) {
-    quickPaletteBtn.addEventListener("click", openPalette);
-  }
-
+  if (quickPaletteBtn) quickPaletteBtn.addEventListener("click", openPalette);
   if (palette) {
     palette.addEventListener("click", (e) => {
       if (e.target === palette) closePalette();
@@ -263,8 +273,7 @@ function dismissLoader() {
       if (!item) return;
       const action = item.dataset.action;
       if (action && action.startsWith("view:")) {
-        const v = action.split(":")[1];
-        showView(v);
+        showView(action.split(":")[1]);
         closePalette();
       }
     });
@@ -282,7 +291,7 @@ function dismissLoader() {
 })();
 
 /* --------------------------------------------------------------------------
-   6. AUTHENTICATION & DEMO HELPERS
+   7. AUTH & DEMO QUICK-LOGIN
    -------------------------------------------------------------------------- */
 $$("[data-auth-tab]").forEach((btn) =>
   btn.addEventListener("click", () => {
@@ -335,7 +344,7 @@ $("#btn-demo-2")?.addEventListener("click", () => {
 });
 
 /* --------------------------------------------------------------------------
-   7. NAVIGATION & DOCK MANAGEMENT
+   8. NAVIGATION & DOCK MANAGEMENT
    -------------------------------------------------------------------------- */
 const menuBtn = $("#menu-btn");
 if (menuBtn) {
@@ -352,8 +361,7 @@ document.addEventListener("click", (e) => {
     $("#menu-dropdown").classList.add("hidden");
   }
   if (!e.target.closest("#app-sidebar") && !e.target.closest("#mobile-nav-toggle")) {
-    const sb = $("#app-sidebar");
-    if (sb) sb.classList.remove("mobile-open");
+    $("#app-sidebar")?.classList.remove("mobile-open");
   }
 });
 
@@ -385,7 +393,7 @@ if (logoutBtn) {
     sessionStorage.removeItem("cp_token");
     $("#app-view").classList.add("hidden");
     $("#auth-view").classList.remove("hidden");
-    toast("Signed out successfully");
+    toast("Signed out");
   });
 }
 
@@ -400,7 +408,7 @@ async function enterApp(token) {
   $("#auth-view").classList.add("hidden");
   $("#app-view").classList.remove("hidden");
   showView("timetable");
-  toast(`Welcome back, ${ME.name.split(" ")[0]} ✦`);
+  toast(`Signed in as ${ME.name} ✦`);
 }
 
 $$(".nav-btn[data-view]").forEach((btn) =>
@@ -408,6 +416,7 @@ $$(".nav-btn[data-view]").forEach((btn) =>
 
 function showView(name) {
   CURRENT_VIEW = name;
+  hideSlotInspector();
   $$(".nav-btn[data-view]").forEach((b) =>
     b.classList.toggle("active", b.dataset.view === name));
   $$(".view").forEach((v) => v.classList.add("hidden"));
@@ -424,7 +433,7 @@ function showView(name) {
 }
 
 /* --------------------------------------------------------------------------
-   8. TIMETABLE MATRIX & INGESTION
+   9. TIMETABLE MATRIX & EXPANDED INSPECTION
    -------------------------------------------------------------------------- */
 const SAMPLE_REGISTRATION_DATA = `1
 General (Semester)
@@ -501,7 +510,7 @@ if (uploadBtn) {
     try {
       const res = await api("POST", "/api/timetable/upload", { raw_text: $("#raw-upload").value });
       if (res.warnings && res.warnings.length) {
-        toast(`Synchronized ${res.saved_courses.length} courses (⚠ ${res.warnings.length} slot clash)`, true);
+        toast(`Synchronized ${res.saved_courses.length} courses (${res.warnings.length} slot clash)`, true);
       } else {
         toast(`Synchronized ${res.saved_courses.length} courses successfully ✦`);
       }
@@ -519,14 +528,14 @@ async function loadGrid() {
   } catch (e) {
     if ($("#grid-table")) {
       $("#grid-table").innerHTML =
-        `<tr><td><div class="cell free" style="padding:24px; text-align:center;">Could not load timetable: ${esc(e.message)} — try pasting your registration in 'Add Courses'.</div></td></tr>`;
+        `<tr><td><div class="cell free" style="padding:20px; text-align:center;">Could not load timetable: ${esc(e.message)} — try pasting your registration in 'Add Courses'.</div></td></tr>`;
     }
     return;
   }
   if (!g.grid_view || !g.theory_slots) {
     if ($("#grid-table")) {
       $("#grid-table").innerHTML =
-        '<tr><td><div class="cell free" style="padding:24px; text-align:center;">No courses synchronized yet — click "Add Courses" or load sample data.</div></td></tr>';
+        '<tr><td><div class="cell free" style="padding:20px; text-align:center;">No courses synchronized yet — click "Add Courses" or load sample data.</div></td></tr>';
     }
     return;
   }
@@ -540,8 +549,8 @@ async function loadGrid() {
   const cellHtml = (c) => {
     if (!c.occupied) return c.token ? esc(c.token) : "·";
     const d = c.data;
-    const tip = `${d.course_code || ""} — ${d.course_title || ""}\nFaculty: ${d.faculty || "TBD"}\nVenue: ${d.venue || "TBD"}\nSlot: ${d.slot_token || d.token || ""}`;
-    return `<span class="tt-tip" data-tip="${esc(tip)}" tabindex="0">${esc(d.course_title)}</span><small>${esc(d.venue || "")}</small>`;
+    const jsonStr = JSON.stringify(d).replace(/"/g, "&quot;");
+    return `<span class="tt-tip" data-slot-json="${jsonStr}" tabindex="0">${esc(d.course_title)}</span><small>${esc(d.venue || "")}</small>`;
   };
 
   const mkTd = (c) => `<td class="${c.occupied ? "occ" : "free"}">${cellHtml(c)}</td>`;
@@ -557,10 +566,37 @@ async function loadGrid() {
       <tr class="lab-row"><td class="tier-label">LAB</td>${rowCells(block.lab_row)}</tr>`;
   }
   if ($("#grid-table")) $("#grid-table").innerHTML = html;
+
+  // Bind Expanded Hover & Click Slot Detail Inspector
+  $$("#grid-table td.occ").forEach((td) => {
+    const tipEl = td.querySelector(".tt-tip");
+    if (!tipEl) return;
+
+    td.addEventListener("mouseenter", () => {
+      clearTimeout(inspectorTimer);
+      inspectorTimer = setTimeout(() => {
+        try {
+          const data = JSON.parse(tipEl.getAttribute("data-slot-json"));
+          showSlotInspector(data);
+        } catch (e) {}
+      }, 140);
+    });
+
+    td.addEventListener("mouseleave", () => {
+      clearTimeout(inspectorTimer);
+    });
+
+    td.addEventListener("click", () => {
+      try {
+        const data = JSON.parse(tipEl.getAttribute("data-slot-json"));
+        showSlotInspector(data);
+      } catch (e) {}
+    });
+  });
 }
 
 /* --------------------------------------------------------------------------
-   9. CLASSMATES & SOCIAL RADAR
+   10. CLASSMATES & SOCIAL RADAR
    -------------------------------------------------------------------------- */
 async function loadRequests() {
   try {
@@ -584,7 +620,7 @@ async function loadRequests() {
         ? res.requests.map((r) => `
           <div class="glass card req-card" data-sid="${r.student_id}">
             <div class="avatar" style="background:${avatarColor(r.name)}">${esc(r.name[0] || "?")}</div>
-            <div class="card-main"><b>${esc(r.name)}</b><div class="meta-line">Wants to synchronize with your timetable</div></div>
+            <div class="card-main"><b>${esc(r.name)}</b><div class="meta-line">Wants to synchronize timetable</div></div>
             <button class="btn btn-primary req-accept">Accept</button>
             <button class="btn btn-secondary req-reject">Decline</button>
           </div>`).join("")
@@ -606,7 +642,7 @@ async function answerRequest(btn, accept) {
     await api("POST", `/api/social/requests/${accept ? "accept" : "reject"}`,
               { student_id: card.dataset.sid });
     $$(`.req-card[data-sid="${card.dataset.sid}"]`).forEach((c) => c.remove());
-    toast(accept ? "Request accepted — timetable comparison unlocked 👋" : "Request declined");
+    toast(accept ? "Request accepted — timetable comparison unlocked" : "Request declined");
     loadRequests();
     loadSocial();
   } catch (err) {
@@ -723,7 +759,7 @@ function bindFollowButtons() {
             btn.dataset.rel = "REQUESTED";
             btn.title = "Request pending · Click to cancel";
             btn.innerHTML = '<span class="btn-text">Requested…</span><span class="btn-hover-text">Cancel ✕</span>';
-            toast("Follow request sent 👋");
+            toast("Follow request sent");
           }
           if (CM_DATA && CM_DATA.classmates) {
             CM_DATA.classmates.forEach((m) => { if (m.student_id === sid) m.rel = res.status; });
@@ -737,7 +773,7 @@ function bindFollowButtons() {
 }
 
 /* --------------------------------------------------------------------------
-   10. SOCIAL NETWORK & COMPARE MATRIX
+   11. SOCIAL NETWORK & COMPARE MATRIX
    -------------------------------------------------------------------------- */
 async function loadSocial() {
   try {
@@ -752,8 +788,8 @@ async function loadSocial() {
     ].map(([n, l]) => `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
 
     const tipFor = (u) => [
-      u.email ? `\u2709 ${u.email}` : "",
-      u.phone ? `\u260e ${u.phone}` : "",
+      u.email ? `Email: ${u.email}` : "",
+      u.phone ? `Phone: ${u.phone}` : "",
       u.instagram ? `Instagram: @${u.instagram}` : "",
       u.bio ? `\n${u.bio}` : "",
     ].filter(Boolean).join("\n") || "No details shared yet";
@@ -816,7 +852,7 @@ async function loadSocial() {
         const name = b.dataset.name || "user";
         try {
           await api("POST", "/api/social/follow", { student_id: sid });
-          toast(`Follow request sent to ${name} 👋`);
+          toast(`Follow request sent to ${name}`);
           loadSocial();
           findClassmates();
         } catch (err) { toast(err.message, true); }
@@ -924,7 +960,7 @@ async function compareWith(peerId) {
 }
 
 /* --------------------------------------------------------------------------
-   11. SLOT EXCHANGE MARKETPLACE (ACID ENGINE)
+   12. SLOT EXCHANGE MARKETPLACE
    -------------------------------------------------------------------------- */
 let MY_CLASSES = [];
 
@@ -962,9 +998,9 @@ function renderMyListings(listings) {
       <div class="my-listing-item" data-lid="${l.listing_id}" style="display:flex; gap:6px; margin-bottom:6px;">
         <button class="course-tab my-listing-btn" data-lid="${l.listing_id}">
           <span>${esc(l.offered_course_code)} \u00b7 ${(l.desired_slot_tokens || []).length ? "wants " + esc(l.desired_slot_tokens.join("+")) : "any slot"}</span>
-          <small>${l.interest_count} \u{1F44B}</small>
+          <small>${l.interest_count} ⇄</small>
         </button>
-        <button class="btn btn-secondary del-listing-btn" data-lid="${l.listing_id}" title="Remove listing" style="padding:8px 12px;">✕</button>
+        <button class="btn btn-secondary del-listing-btn" data-lid="${l.listing_id}" title="Remove listing" style="padding:6px 10px;">✕</button>
       </div>`).join("")
     : '<p class="hint">Nothing listed yet.</p>';
 
@@ -992,7 +1028,7 @@ async function showInterests(lid, label) {
       pane.innerHTML = res.requests && res.requests.length
         ? res.requests.map((r) => `
           <div class="people-row"><div class="avatar sm" style="background:${avatarColor(r.name)}">${esc(r.name[0] || "?")}</div>
-            <span>${esc(r.name)}</span><small class="tag you-follow">WANTS YOUR SLOT</small></div>`).join("")
+            <span>${esc(r.name)}</span><small class="tag you-follow">REQUESTED</small></div>`).join("")
         : '<p class="hint">No one has requested this slot listing yet.</p>';
     }
   } catch (err) {
@@ -1031,7 +1067,7 @@ async function searchMarket() {
     if (el) {
       el.innerHTML = res.count
         ? res.listings.map((l) => `
-          <button class="course-tab mk-item" data-lid="${l.listing_id}" style="margin-bottom:6px;">
+          <button class="course-tab mk-item" data-lid="${l.listing_id}" style="margin-bottom:4px;">
             <span>${esc(l.course)} · ${esc(l.faculty || "TBD")}</span>
             <small>${esc(l.slot_tokens.join("+"))}${l.kinds.includes("LAB") ? " LAB" : ""}</small>
           </button>`).join("")
@@ -1061,23 +1097,23 @@ function showMkDetail(lid) {
   if ($("#mk-detail")) {
     $("#mk-detail").innerHTML = `
       <h2 style="margin-bottom:4px">${esc(l.course)} — ${esc(l.course_title)}</h2>
-      <div class="meta-line" style="margin-bottom:12px">
+      <div class="meta-line" style="margin-bottom:10px">
         ${l.slot_tokens.map((t) => `<span class="chip">${esc(t)}</span>`).join("")}</div>
-      <div class="stat-row" style="margin-bottom:14px;">
-        <div class="stat"><div class="n" style="font-size:15px">${esc(l.faculty || "TBD")}</div><div class="l">Faculty</div></div>
-        <div class="stat"><div class="n" style="font-size:15px">${esc(l.venue || "TBD")}</div><div class="l">Venue</div></div>
-        <div class="stat"><div class="n" style="font-size:15px">${esc(l.peer_name)}</div><div class="l">Listed By</div></div>
+      <div class="stat-row" style="margin-bottom:12px;">
+        <div class="stat"><div class="n" style="font-size:14px">${esc(l.faculty || "TBD")}</div><div class="l">Faculty</div></div>
+        <div class="stat"><div class="n" style="font-size:14px">${esc(l.venue || "TBD")}</div><div class="l">Venue</div></div>
+        <div class="stat"><div class="n" style="font-size:14px">${esc(l.peer_name)}</div><div class="l">Listed By</div></div>
       </div>
-      <p class="hint" style="margin-bottom:14px">Wants in exchange:
+      <p class="hint" style="margin-bottom:12px">Wants in exchange:
         <b>${esc(l.desired_course_code)}</b>
         ${(l.desired_slot_tokens || []).map((t) => `<span class="chip">${esc(t)}</span>`).join("") || "(any slot)"}</p>
       <button id="mk-request" class="btn btn-primary">
-        <span>Request This Slot 🙋</span>
+        <span>Request This Slot</span>
       </button>`;
     $("#mk-request").addEventListener("click", async () => {
       try {
         const out = await api("POST", `/api/swap/list/${lid}/interest`);
-        toast(out.interested ? "Trade interest notified to the student ✦" : "Request withdrawn");
+        toast(out.interested ? "Trade interest sent to student" : "Request withdrawn");
       } catch (err) {
         toast(err.message, true);
       }
@@ -1086,7 +1122,7 @@ function showMkDetail(lid) {
 }
 
 /* --------------------------------------------------------------------------
-   12. PROFILE & IDENTITY MANAGEMENT
+   13. PROFILE MANAGEMENT
    -------------------------------------------------------------------------- */
 function updateAge() {
   const v = $("#pf-dob").value;
@@ -1133,14 +1169,14 @@ $("#pf-save")?.addEventListener("click", async () => {
     });
     ME = await api("GET", "/api/auth/me");
     if ($("#menu-name")) $("#menu-name").textContent = ME.name;
-    toast("Profile identity saved ✦");
+    toast("Profile updated ✦");
   } catch (err) {
     toast(err.message, true);
   }
 });
 
 /* --------------------------------------------------------------------------
-   13. INITIAL BOOTSTRAP
+   14. INITIAL BOOTSTRAP
    -------------------------------------------------------------------------- */
 (async function init() {
   dismissLoader();
@@ -1148,7 +1184,7 @@ $("#pf-save")?.addEventListener("click", async () => {
     try {
       await enterApp(TOKEN);
     } catch (err) {
-      console.error("Session verification error:", err);
+      console.error("Session error:", err);
       if (err.message && (err.message.includes("401") || err.message.includes("403") || err.message.includes("Invalid") || err.message.includes("Unauthorized"))) {
         TOKEN = null;
         localStorage.removeItem("cp_token");

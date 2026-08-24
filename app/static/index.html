@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CourseConE — Liquid Glass Academic Intelligence Network</title>
+  <title>CourseConE — Academic Intelligence &amp; Slot Trading Hub</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -17,54 +17,73 @@
     <div class="loader-ring"></div>
     <div class="loader-core"></div>
   </div>
-  <div class="loader-text">CourseConE · Materializing Interface</div>
+  <div class="loader-text">CourseConE · System Initializing</div>
 </div>
 
-<!-- ============ SIGNATURE CURSOR LIGHT ORB ============ -->
+<!-- ============ SIGNATURE CURSOR LIGHT ORB (2% Cyan Touch) ============ -->
 <div id="liquid-cursor-follower" aria-hidden="true"></div>
 
-<!-- ============ ATMOSPHERIC LAYERS ============ -->
+<!-- ============ ROLLS-ROYCE STARLIGHT ROOF CANVAS ============ -->
 <canvas id="liquid-canvas" aria-hidden="true"></canvas>
-<div class="bg-layer" aria-hidden="true"></div>
-<div class="bg-overlay" aria-hidden="true"></div>
 <div class="noise-overlay" aria-hidden="true"></div>
-<div class="ambient-mesh" aria-hidden="true">
-  <div class="ambient-orb orb-cyan"></div>
-  <div class="ambient-orb orb-violet"></div>
-  <div class="ambient-orb orb-amber"></div>
+
+<!-- ============ EXPANDED SLOT DETAIL INSPECTOR (Hover / Click Trigger) ============ -->
+<div id="slot-detail-inspector" class="glass-elevated" aria-live="polite">
+  <div class="inspector-header">
+    <div class="inspector-title" id="insp-course-title">BCSE302L — Database Systems</div>
+    <button type="button" id="insp-close-btn" class="btn btn-ghost" style="padding:2px 6px; font-size:11px;">✕</button>
+  </div>
+  <div class="inspector-grid">
+    <div class="inspector-item">
+      <div class="lbl">Slot Token</div>
+      <div class="val" id="insp-slot-token">A1+TA1</div>
+    </div>
+    <div class="inspector-item">
+      <div class="lbl">Class Venue</div>
+      <div class="val" id="insp-venue">AB3-505</div>
+    </div>
+    <div class="inspector-item">
+      <div class="lbl">Faculty</div>
+      <div class="val" id="insp-faculty">HELEN VIJITHA P</div>
+    </div>
+    <div class="inspector-item">
+      <div class="lbl">Conflict Radar</div>
+      <div class="val" id="insp-status" style="color:var(--tint-theory-text);">ACID Verified ✓</div>
+    </div>
+  </div>
 </div>
 
 <!-- ============ COMMAND PALETTE HUD (Cmd+K) ============ -->
 <div id="command-palette-backdrop" class="hidden">
   <div class="command-palette-card glass-elevated">
     <div class="cp-search-row">
-      <svg class="cp-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="cp-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
-      <input type="text" id="cp-search-input" class="cp-input" placeholder="Type a view, classmate, or command... (e.g. timetable, swap, demo)" autocomplete="off">
+      <input type="text" id="cp-search-input" class="cp-input" placeholder="Jump to view, course, or peer... (Cmd+K)" autocomplete="off">
       <span class="cp-item-key">ESC</span>
     </div>
     <div class="cp-results-list" id="cp-results-list">
       <div class="cp-item" data-action="view:timetable">
-        <span>📅 Open Timetable Matrix</span><span class="cp-item-key">1</span>
+        <span>📅 Weekly Timetable Matrix</span><span class="cp-item-key">1</span>
       </div>
       <div class="cp-item" data-action="view:upload">
-        <span>➕ Add / Ingest Courses</span><span class="cp-item-key">2</span>
+        <span>➕ Add / Synchronize Courses</span><span class="cp-item-key">2</span>
       </div>
       <div class="cp-item" data-action="view:classmates">
-        <span>👥 Discover Classmates</span><span class="cp-item-key">3</span>
+        <span>👥 Classmate Match Radar</span><span class="cp-item-key">3</span>
       </div>
       <div class="cp-item" data-action="view:social">
-        <span>⚡ Network &amp; Requests</span><span class="cp-item-key">4</span>
+        <span>⚡ Network &amp; Mutuals</span><span class="cp-item-key">4</span>
       </div>
       <div class="cp-item" data-action="view:compare">
         <span>🔄 Compare Timetables</span><span class="cp-item-key">5</span>
       </div>
       <div class="cp-item" data-action="view:swap">
-        <span>⇄ Slot Exchange Market</span><span class="cp-item-key">6</span>
+        <span>⇄ Slot Exchange Marketplace</span><span class="cp-item-key">6</span>
       </div>
       <div class="cp-item" data-action="view:profile">
-        <span>👤 Edit Profile &amp; Socials</span><span class="cp-item-key">7</span>
+        <span>👤 Student Identity &amp; Profile</span><span class="cp-item-key">7</span>
       </div>
     </div>
   </div>
@@ -75,7 +94,7 @@
   <div class="hero-spatial-container">
     <div class="hero-badge">
       <span class="pulse-dot"></span>
-      <span style="font-size:12px; font-weight:600; letter-spacing:0.04em; color:var(--text-secondary);">ACADEMIC INTELLIGENCE ENGINE · SDG 4 &amp; 10</span>
+      <span style="font-size:11.5px; font-weight:600; letter-spacing:0.04em; color:var(--text-secondary);">ACADEMIC INTELLIGENCE ENGINE · SDG 4 &amp; 10</span>
     </div>
 
     <div class="glass auth-card">
@@ -83,11 +102,11 @@
         <span class="logo-prism">◮</span>
         <span class="text-gradient">CourseConE</span>
       </div>
-      <p class="tagline">Next-Gen Timetable Matching &amp; Slot Trading Hub</p>
+      <p class="tagline">Timetable Matching &amp; Slot Trading Platform</p>
 
       <div class="tab-row" style="margin-bottom:8px;">
-        <button class="tab active" data-auth-tab="login">sign in</button>
-        <button class="tab" data-auth-tab="register">join network</button>
+        <button class="tab active" data-auth-tab="login">Sign In</button>
+        <button class="tab" data-auth-tab="register">Join Network</button>
       </div>
 
       <!-- Sign In Form -->
@@ -96,23 +115,23 @@
         <input type="password" id="li-pass" placeholder="password" required autocomplete="current-password">
         <button class="btn btn-primary" type="submit" style="width:100%;">
           <span>Enter Study Room</span>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
         </button>
       </form>
 
       <!-- Register Form -->
       <form id="register-form" class="auth-form hidden">
         <input type="text" id="rg-roll" placeholder="roll no (e.g. 22BCE0001)" required>
-        <input type="text" id="rg-name" placeholder="your full name" required>
+        <input type="text" id="rg-name" placeholder="full name" required>
         <input type="email" id="rg-email" placeholder="you@vitstudent.ac.in" required autocomplete="email">
         <input type="password" id="rg-pass" placeholder="choose password" required autocomplete="new-password">
         <button class="btn btn-primary" type="submit" style="width:100%;">
-          <span>Create Student Identity</span>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Create Student Account</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
         </button>
       </form>
 
-      <!-- Demo Quick-Fill for Evaluators -->
+      <!-- Quick Evaluator Access -->
       <div class="auth-demo-helper">
         <span class="field-label" style="text-align:center; margin-bottom:2px;">Quick Evaluator / Demo Login</span>
         <div class="demo-btn-row">
@@ -126,16 +145,16 @@
   </div>
 
   <footer class="lofi-footer">
-    <span style="color:var(--cyan);">✦</span> Liquid Glass Spatial Workspace · Zero Conflict ACID Engine · SDG 4 · SDG 10
+    <span style="color:var(--cyan);">✦</span> Formal Monochromatic Liquid Glass · ACID Engine · SDG 4 · SDG 10
   </footer>
 </main>
 
 <!-- ============ MAIN APPLICATION VIEW ============ -->
 <div id="app-view" class="hidden">
-  <!-- Mobile Navigation Bar Trigger -->
+  <!-- Mobile Nav Trigger -->
   <button id="mobile-nav-toggle" class="mobile-nav-toggle" aria-label="Toggle navigation">☰</button>
 
-  <!-- Left Liquid Glass Navigation Dock -->
+  <!-- Left Navigation Dock -->
   <aside id="app-sidebar" class="sidebar">
     <div class="sidebar-top">
       <div class="sidebar-brand">
@@ -143,7 +162,7 @@
         <span class="logo-text">CourseConE</span>
       </div>
       <button id="sidebar-collapse-btn" class="collapse-toggle-btn" title="Toggle Sidebar (Ctrl+B)" aria-label="Toggle Sidebar">
-        <svg class="collapse-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <svg class="collapse-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
@@ -159,11 +178,11 @@
         <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
         <span class="nav-label">Add Courses</span>
       </button>
-      <button class="nav-btn" data-view="classmates" title="Classmate Radar">
+      <button class="nav-btn" data-view="classmates" title="Classmates">
         <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
         <span class="nav-label">Classmates</span>
       </button>
-      <button class="nav-btn" data-view="social" title="Network &amp; Mutuals">
+      <button class="nav-btn" data-view="social" title="Network &amp; Requests">
         <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
         <span class="nav-label">Social</span>
         <span id="nav-badge-social" class="nav-badge hidden">0</span>
@@ -172,17 +191,17 @@
         <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
         <span class="nav-label">Compare</span>
       </button>
-      <button class="nav-btn" data-view="swap" title="Slot Exchange Market">
+      <button class="nav-btn" data-view="swap" title="Slot Market">
         <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
         <span class="nav-label">Slot Market</span>
       </button>
-      <button class="nav-btn" data-view="profile" title="Identity &amp; Profile">
+      <button class="nav-btn" data-view="profile" title="Student Profile">
         <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         <span class="nav-label">Profile</span>
       </button>
     </nav>
 
-    <!-- Sidebar Bottom / Account Settings -->
+    <!-- Sidebar Bottom -->
     <div class="sidebar-bottom">
       <div class="menu-wrap">
         <button id="menu-btn" class="nav-btn user-btn" title="Account Menu">
@@ -204,7 +223,7 @@
   <!-- Global Toast -->
   <p id="toast" class="toast hidden"></p>
 
-  <!-- View Content Surface -->
+  <!-- Main View Surface -->
   <div class="app-content-wrapper">
 
     <!-- 1. TIMETABLE MATRIX VIEW -->
@@ -214,12 +233,12 @@
           <div class="panel-head">
             <div>
               <h2 class="text-gradient">Weekly Timetable Matrix</h2>
-              <p class="hint">5-Day Theory &amp; Laboratory Slot Breakdown with Zero Clashes</p>
+              <p class="hint">5-Day Theory &amp; Lab Grid · Hover or click any slot to expand full specification</p>
             </div>
-            <div style="display:flex; gap:10px; align-items:center;">
+            <div style="display:flex; gap:8px; align-items:center;">
               <button type="button" class="btn btn-secondary" id="btn-quick-palette" title="Quick Search (Ctrl+K)">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <span>Search <kbd style="font-size:10px; opacity:0.6;">⌘K</kbd></span>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span>Search <kbd style="font-size:9.5px; opacity:0.6;">⌘K</kbd></span>
               </button>
             </div>
           </div>
@@ -230,13 +249,13 @@
       </div>
     </section>
 
-    <!-- 2. ADD / INGEST COURSES VIEW -->
+    <!-- 2. ADD COURSES VIEW -->
     <section id="view-upload" class="view hidden">
-      <div class="glass panel" style="max-width:980px;">
+      <div class="glass panel" style="max-width:920px;">
         <div class="panel-head">
           <div>
             <h2 class="text-gradient">FFCS Registration Ingestion</h2>
-            <p class="hint">Copy and paste your raw registration table from VTOP or the academic portal.</p>
+            <p class="hint">Paste the registration text from the student portal.</p>
           </div>
           <button type="button" class="btn btn-secondary" id="btn-fill-sample-timetable">
             <span>✨ Load Sample Data</span>
@@ -244,7 +263,7 @@
         </div>
         <textarea id="raw-upload" rows="13" spellcheck="false"
           placeholder="1&#10;General (Semester)&#10;BCSE302L - Database Systems&#10;( Theory Only )&#10;3 0 0 0 3.0&#10;Discipline Core&#10;Regular&#10;CH2026270100945&#10;A1+TA1 -&#10;AB3-505&#10;HELEN VIJITHA P -&#10;SCOPE&#10;27-Jun-2026 10:47&#10;Registered and Approved&#10;..."></textarea>
-        <div class="row-end" style="gap:12px; margin-top:16px;">
+        <div class="row-end" style="gap:10px; margin-top:14px;">
           <button id="upload-btn" class="btn btn-primary">
             <span>Parse &amp; Synchronize Matrix ✦</span>
           </button>
@@ -252,21 +271,21 @@
       </div>
     </section>
 
-    <!-- 3. CLASSMATES RADAR VIEW -->
+    <!-- 3. CLASSMATES VIEW -->
     <section id="view-classmates" class="view hidden">
       <div class="split-layout">
         <aside class="glass side-nav">
-          <h2 style="font-size:18px;">Enrolled Courses</h2>
-          <p class="hint" style="font-size:12px; margin-top:2px;">Filter peers by course slot</p>
+          <h2 style="font-size:16px;">Enrolled Courses</h2>
+          <p class="hint" style="font-size:11.5px; margin-top:2px;">Filter peers by course</p>
           <div id="course-tabs"></div>
         </aside>
         <div class="split-main">
           <div class="glass panel" style="margin:0;">
-            <div class="panel-head" style="margin-bottom:6px;">
+            <div class="panel-head" style="margin-bottom:4px;">
               <h2 id="peers-title" class="text-gradient">Classmate Radar</h2>
               <span id="req-count" class="pill"></span>
             </div>
-            <p class="hint">Mutual follow unlocks peer direct messaging and schedule synchronization.</p>
+            <p class="hint">Mutual follow unlocks contact details and schedule synchronization.</p>
           </div>
           <div id="cm-results"></div>
         </div>
@@ -277,12 +296,12 @@
     <section id="view-social" class="view hidden">
       <div class="split-layout">
         <aside class="glass side-nav">
-          <h2 style="font-size:18px;">Network Hub</h2>
+          <h2 style="font-size:16px;">Network Stats</h2>
           <div id="network-stats" class="stat-col"></div>
         </aside>
         <div class="split-main">
           <div class="glass panel" style="margin:0;">
-            <div class="panel-head" style="margin-bottom:8px;">
+            <div class="panel-head" style="margin-bottom:6px;">
               <h2>Pending Follow Requests</h2>
               <span id="req-count-social" class="pill"></span>
             </div>
@@ -290,11 +309,11 @@
           </div>
           <div class="duo-grid">
             <div class="glass panel" style="margin:0;">
-              <div class="panel-head" style="margin-bottom:12px;"><h2>Followers</h2></div>
+              <div class="panel-head" style="margin-bottom:10px;"><h2>Followers</h2></div>
               <div id="followers-box"></div>
             </div>
             <div class="glass panel" style="margin:0;">
-              <div class="panel-head" style="margin-bottom:12px;"><h2>Following</h2></div>
+              <div class="panel-head" style="margin-bottom:10px;"><h2>Following</h2></div>
               <div id="following-box"></div>
             </div>
           </div>
@@ -309,7 +328,7 @@
           <div class="panel-head">
             <div>
               <h2 id="cmp-title" class="text-gradient">Compare Timetables</h2>
-              <p class="hint">Visualize schedule overlaps, common lectures, and mutual free slots.</p>
+              <p class="hint">Visualize schedule overlaps and common slots.</p>
             </div>
           </div>
 
@@ -334,7 +353,7 @@
           </div>
         </div>
 
-        <div class="glass panel grid-panel" style="margin-top:16px;">
+        <div class="glass panel grid-panel" style="margin-top:14px;">
           <div class="table-wrap">
             <table id="cmp-table"></table>
           </div>
@@ -342,12 +361,12 @@
       </div>
     </section>
 
-    <!-- 6. PROFILE & IDENTITY VIEW -->
+    <!-- 6. PROFILE VIEW -->
     <section id="view-profile" class="view hidden">
-      <div class="tt-wrap" style="max-width:1100px;">
+      <div class="tt-wrap" style="max-width:1050px;">
         <div class="profile-grid">
           <div class="glass panel" style="margin:0;">
-            <div class="panel-head" style="margin-bottom:14px;">
+            <div class="panel-head" style="margin-bottom:12px;">
               <h2>Personal Identity</h2>
             </div>
             <form id="profile-form" class="auth-form" style="margin-top:0;">
@@ -360,7 +379,7 @@
                 <input id="pf-email" type="email" placeholder="you@vitstudent.ac.in">
               </div>
               <div>
-                <label class="field-label">Phone Number (Unlocked upon mutual follow)</label>
+                <label class="field-label">Phone Number (Shared upon mutual follow)</label>
                 <input id="pf-phone" placeholder="+91 98765 43210">
               </div>
               <div>
@@ -371,15 +390,15 @@
                 </div>
               </div>
               <div>
-                <label class="field-label">Bio / Academic Interests</label>
-                <textarea id="pf-bio" rows="4" placeholder="Tell peers what courses you're taking or study groups you run..."></textarea>
+                <label class="field-label">Bio / Academic Note</label>
+                <textarea id="pf-bio" rows="4" placeholder="Share a line about your courses or research..."></textarea>
               </div>
             </form>
           </div>
 
           <div class="glass panel" style="margin:0;">
-            <div class="panel-head" style="margin-bottom:14px;">
-              <h2>Connected Socials</h2>
+            <div class="panel-head" style="margin-bottom:12px;">
+              <h2>Social Links</h2>
             </div>
             <form class="auth-form" style="margin-top:0;" onsubmit="return false">
               <div class="link-field">
@@ -388,11 +407,11 @@
               </div>
               <div class="link-field">
                 <span class="lk-ic">f</span>
-                <input id="pf-fb" placeholder="Facebook profile / ID">
+                <input id="pf-fb" placeholder="Facebook handle">
               </div>
               <div class="link-field">
                 <span class="lk-ic">in</span>
-                <input id="pf-linkedin" placeholder="LinkedIn handle">
+                <input id="pf-linkedin" placeholder="LinkedIn profile">
               </div>
               <div class="link-field">
                 <span class="lk-ic">⌥</span>
@@ -402,7 +421,7 @@
                 <span class="lk-ic">r/</span>
                 <input id="pf-reddit" placeholder="Reddit username">
               </div>
-              <button id="pf-save" class="btn btn-primary" style="width:100%; margin-top:8px;">
+              <button id="pf-save" class="btn btn-primary" style="width:100%; margin-top:6px;">
                 <span>Save Profile Changes ✦</span>
               </button>
             </form>
@@ -414,10 +433,10 @@
     <!-- 7. SLOT EXCHANGE MARKET VIEW -->
     <section id="view-swap" class="view hidden">
       <div class="tt-wrap">
-        <div style="display:flex; justify-content:center; margin-bottom:16px;">
+        <div style="display:flex; justify-content:center; margin-bottom:14px;">
           <div class="tab-row market-tabs">
             <button class="tab active" data-market-tab="sell">Offer / Sell Slot</button>
-            <button class="tab" data-market-tab="buy">Explore / Request Slots</button>
+            <button class="tab" data-market-tab="buy">Explore Market</button>
           </div>
         </div>
 
@@ -425,22 +444,22 @@
         <div id="mkt-sell">
           <div class="split-layout">
             <aside class="glass side-nav">
-              <h2 style="font-size:18px;">Create Slot Listing</h2>
-              <p class="hint" style="font-size:12px; margin:4px 0 12px;">Put one of your enrolled slots on the peer exchange</p>
-              <select id="sw-class" style="margin-bottom:10px;"></select>
-              <input id="sw-want-course" placeholder="Desired Course (e.g. BCSE305L)" style="margin-bottom:10px;">
-              <input id="sw-want-slots" placeholder="Desired Slots (e.g. B2+TB2)" style="margin-bottom:12px;">
+              <h2 style="font-size:16px;">Create Slot Listing</h2>
+              <p class="hint" style="font-size:11.5px; margin:4px 0 10px;">Post an enrolled slot for peer exchange</p>
+              <select id="sw-class" style="margin-bottom:8px;"></select>
+              <input id="sw-want-course" placeholder="Desired Course (e.g. BCSE305L)" style="margin-bottom:8px;">
+              <input id="sw-want-slots" placeholder="Desired Slots (e.g. B2+TB2)" style="margin-bottom:10px;">
               <button id="sw-create" class="btn btn-primary" style="width:100%;">
-                <span>Publish to Market ⇄</span>
+                <span>Publish Listing ⇄</span>
               </button>
 
-              <h2 style="font-size:16px; margin-top:24px; margin-bottom:6px;">Your Active Listings</h2>
+              <h2 style="font-size:15px; margin-top:20px; margin-bottom:6px;">Active Listings</h2>
               <div id="my-listings"><p class="hint">No active listings yet.</p></div>
             </aside>
             <div class="split-main">
               <div class="glass panel" style="margin:0;">
                 <div class="panel-head">
-                  <h2 id="int-title">Buyer Requests &amp; Inquiries</h2>
+                  <h2 id="int-title">Inquiries &amp; Trade Requests</h2>
                 </div>
                 <div id="interest-pane"><p class="hint">Select an active listing to view interested peers.</p></div>
               </div>
@@ -452,15 +471,15 @@
         <div id="mkt-buy" class="hidden">
           <div class="split-layout">
             <aside class="glass side-nav">
-              <h2 style="font-size:18px;">Search Market</h2>
-              <input id="mk-q" placeholder="Course code, title or slot..." style="margin-bottom:8px;">
+              <h2 style="font-size:16px;">Search Market</h2>
+              <input id="mk-q" placeholder="Course code, title, slot..." style="margin-bottom:8px;">
               <input id="mk-teacher" placeholder="Faculty name..." style="margin-bottom:8px;">
               <select id="mk-type" style="margin-bottom:10px;">
                 <option value="">Any slot type</option>
                 <option value="THEORY">Theory Only</option>
                 <option value="LAB">Lab Only</option>
               </select>
-              <button id="mk-search" class="btn btn-primary" style="width:100%; margin-bottom:16px;">
+              <button id="mk-search" class="btn btn-primary" style="width:100%; margin-bottom:14px;">
                 <span>Search Listings ⌕</span>
               </button>
               <div id="mk-results"></div>
@@ -472,7 +491,7 @@
                   <span id="mk-badge" class="pill hidden"></span>
                 </div>
                 <div id="mk-detail">
-                  <p class="hint">Pick a listing from the search results to inspect details and trade.</p>
+                  <p class="hint">Pick a listing from the search results to inspect details.</p>
                 </div>
               </div>
             </div>
