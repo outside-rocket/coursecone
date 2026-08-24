@@ -1,13 +1,23 @@
-/* CampusPeer SPA — vanilla JS */
+/* ==========================================================================
+   CourseConE — Exotic Liquid Glass UI Client Engine
+   Vanilla JS · 60 FPS Physics · Cursor Refraction · Full ACID Integration
+   ========================================================================== */
+
 const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
 const API = "";
 let TOKEN = localStorage.getItem("cp_token") || sessionStorage.getItem("cp_token") || null;
 let ME = null;
-let chatPeer = null;
-const PALETTE = ["#a78bfa", "#ff9440", "#c4b0ff", "#ffb066", "#8b5cf6",
-  "#ff7e33", "#d8ccff", "#ffc49b"];
+let CURRENT_VIEW = "timetable";
 
-/* ---------- helpers ---------- */
+const PALETTE = [
+  "#a855f7", "#00f0ff", "#ff9440", "#10b981",
+  "#ec4899", "#6366f1", "#3b82f6", "#f59e0b"
+];
+
+/* --------------------------------------------------------------------------
+   1. CORE API & UTILITIES
+   -------------------------------------------------------------------------- */
 async function api(method, path, body, auth = true) {
   const headers = { "Content-Type": "application/json" };
   if (auth && TOKEN) headers["Authorization"] = "Bearer " + TOKEN;
@@ -25,7 +35,7 @@ function toast(msg, err = false) {
   t.textContent = msg;
   t.className = "toast" + (err ? " err" : "");
   clearTimeout(t._h);
-  t._h = setTimeout(() => t.classList.add("hidden"), 3200);
+  t._h = setTimeout(() => t.classList.add("hidden"), 3400);
 }
 
 function esc(s) {
@@ -34,63 +44,314 @@ function esc(s) {
 }
 
 function avatarColor(name) {
-  let h = 0; for (const ch of name || "?") h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  let h = 0;
+  for (const ch of name || "?") h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   return PALETTE[h % PALETTE.length];
 }
 
-/* ---------- auth ---------- */
-document.querySelectorAll("[data-auth-tab]").forEach((btn) =>
+/* --------------------------------------------------------------------------
+   2. LIQUID INTRO LOADER SEQUENCE
+   -------------------------------------------------------------------------- */
+function dismissLoader() {
+  const loader = $("#liquid-loader-screen");
+  if (loader) {
+    setTimeout(() => {
+      loader.classList.add("fade-out");
+      setTimeout(() => loader.remove(), 650);
+    }, 450);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. BACKGROUND LIQUID STARDUST CANVAS
+   -------------------------------------------------------------------------- */
+(function initLiquidCanvas() {
+  const canvas = $("#liquid-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  let width, height;
+  let particles = [];
+  const count = window.innerWidth < 768 ? 35 : 75;
+  let mouse = { x: -1000, y: -1000, radius: 120 };
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  window.addEventListener("mousemove", (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
+
+  class Particle {
+    constructor() {
+      this.reset(true);
+    }
+    reset(initial = false) {
+      this.x = Math.random() * width;
+      this.y = initial ? Math.random() * height : height + 10;
+      this.size = Math.random() * 1.8 + 0.6;
+      this.baseX = this.x;
+      this.baseY = this.y;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = -(Math.random() * 0.4 + 0.2);
+      this.alpha = Math.random() * 0.5 + 0.2;
+      this.color = Math.random() > 0.6 ? "rgba(0, 240, 255, " : "rgba(168, 85, 247, ";
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      // Mouse subtle deflection
+      const dx = mouse.x - this.x;
+      const dy = mouse.y - this.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < mouse.radius) {
+        const force = (mouse.radius - dist) / mouse.radius;
+        this.x -= (dx / dist) * force * 2.2;
+        this.y -= (dy / dist) * force * 2.2;
+      }
+
+      if (this.y < -10 || this.x < -10 || this.x > width + 10) {
+        this.reset();
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color + this.alpha + ")";
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < count; i++) {
+    particles.push(new Particle());
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, width, height);
+    for (let p of particles) {
+      p.update();
+      p.draw();
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* --------------------------------------------------------------------------
+   4. LIQUID CURSOR ORB & SPECULAR RAY REFRACTION
+   -------------------------------------------------------------------------- */
+(function initCursorAndRefraction() {
+  const orb = $("#liquid-cursor-follower");
+  let orbX = -1000, orbY = -1000;
+  let targetX = -1000, targetY = -1000;
+
+  window.addEventListener("mousemove", (e) => {
+    targetX = e.clientX;
+    targetY = e.clientY;
+
+    // Specular light sweep on hovered cards/panels
+    const hoveredElement = e.target.closest(".glass, .liquid-glass, .card, .panel, .btn");
+    if (hoveredElement) {
+      const rect = hoveredElement.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      hoveredElement.style.setProperty("--mouse-x", `${x}%`);
+      hoveredElement.style.setProperty("--mouse-y", `${y}%`);
+    }
+  });
+
+  function renderOrb() {
+    if (orb) {
+      orbX += (targetX - orbX) * 0.16;
+      orbY += (targetY - orbY) * 0.16;
+      orb.style.transform = `translate3d(${orbX}px, ${orbY}px, 0)`;
+    }
+    requestAnimationFrame(renderOrb);
+  }
+  renderOrb();
+
+  // Dynamic 3D Card Tilt Physics
+  document.addEventListener("mousemove", (e) => {
+    const card = e.target.closest(".card, .glass.panel, .auth-card");
+    if (!card || window.innerWidth < 768) return;
+
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -4;
+    const rotateY = ((x - centerX) / centerX) * 4;
+
+    card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
+  });
+
+  document.addEventListener("mouseout", (e) => {
+    const card = e.target.closest(".card, .glass.panel, .auth-card");
+    if (card) {
+      card.style.transform = "";
+    }
+  });
+
+  // Magnetic CTA Button & Tactile Ripple Wave
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn");
+    if (!btn) return;
+
+    const rect = btn.getBoundingClientRect();
+    const ripple = document.createElement("span");
+    ripple.className = "btn-ripple";
+    const diameter = Math.max(rect.width, rect.height);
+    const radius = diameter / 2;
+    ripple.style.width = ripple.style.height = `${diameter}px`;
+    ripple.style.left = `${e.clientX - rect.left - radius}px`;
+    ripple.style.top = `${e.clientY - rect.top - radius}px`;
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 700);
+  });
+})();
+
+/* --------------------------------------------------------------------------
+   5. COMMAND PALETTE HUD (Cmd+K)
+   -------------------------------------------------------------------------- */
+(function initCommandPalette() {
+  const palette = $("#command-palette-backdrop");
+  const input = $("#cp-search-input");
+  const list = $("#cp-results-list");
+  const quickPaletteBtn = $("#btn-quick-palette");
+
+  function openPalette() {
+    if (!palette) return;
+    palette.classList.remove("hidden");
+    if (input) {
+      input.value = "";
+      input.focus();
+    }
+  }
+
+  function closePalette() {
+    if (palette) palette.classList.add("hidden");
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      palette && palette.classList.contains("hidden") ? openPalette() : closePalette();
+    } else if (e.key === "Escape") {
+      closePalette();
+    }
+  });
+
+  if (quickPaletteBtn) {
+    quickPaletteBtn.addEventListener("click", openPalette);
+  }
+
+  if (palette) {
+    palette.addEventListener("click", (e) => {
+      if (e.target === palette) closePalette();
+    });
+  }
+
+  if (list) {
+    list.addEventListener("click", (e) => {
+      const item = e.target.closest(".cp-item");
+      if (!item) return;
+      const action = item.dataset.action;
+      if (action && action.startsWith("view:")) {
+        const v = action.split(":")[1];
+        showView(v);
+        closePalette();
+      }
+    });
+  }
+
+  if (input) {
+    input.addEventListener("input", () => {
+      const q = input.value.toLowerCase().trim();
+      $$(".cp-item").forEach((item) => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(q) ? "flex" : "none";
+      });
+    });
+  }
+})();
+
+/* --------------------------------------------------------------------------
+   6. AUTHENTICATION & DEMO HELPERS
+   -------------------------------------------------------------------------- */
+$$("[data-auth-tab]").forEach((btn) =>
   btn.addEventListener("click", () => {
-    document.querySelectorAll("[data-auth-tab]").forEach((b) => b.classList.remove("active"));
+    $$("[data-auth-tab]").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     $("#login-form").classList.toggle("hidden", btn.dataset.authTab !== "login");
     $("#register-form").classList.toggle("hidden", btn.dataset.authTab !== "register");
     $("#auth-error").textContent = "";
   }));
 
-$("#login-form").addEventListener("submit", async (e) => {
+$("#login-form")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
     const res = await api("POST", "/api/auth/login", {
-      email: $("#li-email").value.trim(), password: $("#li-pass").value,
+      email: $("#li-email").value.trim(),
+      password: $("#li-pass").value,
     }, false);
     enterApp(res.token);
-  } catch (err) { $("#auth-error").textContent = err.message; }
+  } catch (err) {
+    $("#auth-error").textContent = err.message;
+  }
 });
 
-$("#register-form").addEventListener("submit", async (e) => {
+$("#register-form")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
     const res = await api("POST", "/api/auth/register", {
-      roll_no: $("#rg-roll").value.trim(), name: $("#rg-name").value.trim(),
-      email: $("#rg-email").value.trim(), password: $("#rg-pass").value,
+      roll_no: $("#rg-roll").value.trim(),
+      name: $("#rg-name").value.trim(),
+      email: $("#rg-email").value.trim(),
+      password: $("#rg-pass").value,
     }, false);
     enterApp(res.token);
-  } catch (err) { $("#auth-error").textContent = err.message; }
+  } catch (err) {
+    $("#auth-error").textContent = err.message;
+  }
 });
 
-/* ---------- menu / nav ---------- */
+// Demo Evaluator Login buttons
+$("#btn-demo-1")?.addEventListener("click", () => {
+  $("#li-email").value = "22bce0001@vitstudent.ac.in";
+  $("#li-pass").value = "password123";
+  $("#login-form").dispatchEvent(new Event("submit"));
+});
+
+$("#btn-demo-2")?.addEventListener("click", () => {
+  $("#li-email").value = "22bce0002@vitstudent.ac.in";
+  $("#li-pass").value = "password123";
+  $("#login-form").dispatchEvent(new Event("submit"));
+});
+
+/* --------------------------------------------------------------------------
+   7. NAVIGATION & DOCK MANAGEMENT
+   -------------------------------------------------------------------------- */
 const menuBtn = $("#menu-btn");
 if (menuBtn) {
   menuBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     const dd = $("#menu-dropdown");
-    // sidebar has overflow:hidden + backdrop-filter which clip fixed children;
-    // re-parent the dropdown to <body> so it renders above everything
     if (dd && dd.parentNode !== document.body) document.body.appendChild(dd);
     dd.classList.toggle("hidden");
   });
 }
+
 document.addEventListener("click", (e) => {
-  if (!e.target.closest(".menu-wrap") && $("#menu-dropdown")) $("#menu-dropdown").classList.add("hidden");
-  if (!e.target.closest("#app-sidebar") && !e.target.closest("#mobile-nav-toggle")) {
-    const sb = $("#app-sidebar");
-    if (sb) sb.classList.remove("mobile-open");
+  if (!e.target.closest(".menu-wrap") && $("#menu-dropdown")) {
+    $("#menu-dropdown").classList.add("hidden");
   }
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    if ($("#menu-dropdown")) $("#menu-dropdown").classList.add("hidden");
+  if (!e.target.closest("#app-sidebar") && !e.target.closest("#mobile-nav-toggle")) {
     const sb = $("#app-sidebar");
     if (sb) sb.classList.remove("mobile-open");
   }
@@ -104,18 +365,15 @@ if (sidebarCollapseBtn) {
     localStorage.setItem("cp_sidebar_collapsed", isCollapsed ? "1" : "0");
   });
   if (localStorage.getItem("cp_sidebar_collapsed") === "1") {
-    const sb = $("#app-sidebar");
-    if (sb) sb.classList.add("collapsed");
-    const av = $("#app-view");
-    if (av) av.classList.add("sidebar-collapsed");
+    $("#app-sidebar")?.classList.add("collapsed");
+    $("#app-view")?.classList.add("sidebar-collapsed");
   }
 }
 
 const mobileNavToggle = $("#mobile-nav-toggle");
 if (mobileNavToggle) {
   mobileNavToggle.addEventListener("click", () => {
-    const sb = $("#app-sidebar");
-    if (sb) sb.classList.toggle("mobile-open");
+    $("#app-sidebar")?.classList.toggle("mobile-open");
   });
 }
 
@@ -127,6 +385,7 @@ if (logoutBtn) {
     sessionStorage.removeItem("cp_token");
     $("#app-view").classList.add("hidden");
     $("#auth-view").classList.remove("hidden");
+    toast("Signed out successfully");
   });
 }
 
@@ -141,110 +400,151 @@ async function enterApp(token) {
   $("#auth-view").classList.add("hidden");
   $("#app-view").classList.remove("hidden");
   showView("timetable");
+  toast(`Welcome back, ${ME.name.split(" ")[0]} ✦`);
 }
 
-/* ---------- nav ---------- */
-document.querySelectorAll(".nav-btn[data-view]").forEach((btn) =>
+$$(".nav-btn[data-view]").forEach((btn) =>
   btn.addEventListener("click", () => showView(btn.dataset.view)));
 
 function showView(name) {
   CURRENT_VIEW = name;
-  document.querySelectorAll(".nav-btn[data-view]").forEach((b) =>
+  $$(".nav-btn[data-view]").forEach((b) =>
     b.classList.toggle("active", b.dataset.view === name));
-  document.querySelectorAll(".view").forEach((v) => v.classList.add("hidden"));
+  $$(".view").forEach((v) => v.classList.add("hidden"));
   const viewEl = $("#view-" + name);
   if (viewEl) viewEl.classList.remove("hidden");
-  const sb = $("#app-sidebar");
-  if (sb) sb.classList.remove("mobile-open");
-  if (name === "timetable") { loadGrid(); }
+  $("#app-sidebar")?.classList.remove("mobile-open");
+
+  if (name === "timetable") loadGrid();
   if (name === "classmates") { findClassmates(); loadRequests(); }
   if (name === "social") { loadSocial(); loadRequests(); }
-  if (name === "compare") { loadCompare(); }
-  if (name === "profile") { loadProfile(); }
+  if (name === "compare") loadCompare();
+  if (name === "profile") loadProfile();
   if (name === "swap") { loadSwap(); searchMarket(); }
 }
 
-/* live refresh removed: polling re-rendered lists and reset user selections */
+/* --------------------------------------------------------------------------
+   8. TIMETABLE MATRIX & INGESTION
+   -------------------------------------------------------------------------- */
+const SAMPLE_REGISTRATION_DATA = `1
+General (Semester)
+BCSE302L - Database Systems
+( Theory Only )
+3 0 0 0 3.0
+Discipline Core
+Regular
+CH2026270100945
+A1+TA1 -
+AB3-505
+HELEN VIJITHA P -
+SCOPE
+27-Jun-2026 10:47
+28-Jun-2026 - Manual
+Registered and Approved
 
-/* ---------- timetable ---------- */
-function recentsKey() { return `cp_recent_${ME ? ME.student_id : "anon"}`; }
+2
+General (Semester)
+BCSE302P - Database Systems Lab
+( Lab Only )
+0 0 2 0 1.0
+Discipline Core
+Regular
+CH2026270100947
+L11+L12 -
+AB3-311
+HELEN VIJITHA P -
+SCOPE
+27-Jun-2026 10:47
+Registered and Approved
 
-function getRecents() {
-  try { return JSON.parse(localStorage.getItem(recentsKey()) || "[]"); } catch { return []; }
-}
+3
+General (Semester)
+BMAT205L - Discrete Mathematics and Graph Theory
+( Theory Only )
+3 1 0 0 4.0
+Discipline-linked Engineering Sciences
+Regular
+CH2026270100261
+C1+TC1+TCC1 -
+AB3-405
+THANGARAJ M -
+SAS
+27-Jun-2026 10:22
+Registered and Approved
 
-function addRecents(saved, parsedCount) {
-  const now = new Date().toLocaleString();
-  const entry = { at: now, courses: saved, count: parsedCount };
-  const list = [entry, ...getRecents()].slice(0, 5);
-  localStorage.setItem(recentsKey(), JSON.stringify(list));
-}
+4
+General (Semester)
+BCSE301L - Computer Networks
+( Theory Only )
+3 0 0 0 3.0
+Discipline Core
+Regular
+CH2026270100812
+B1+TB1 -
+AB3-204
+RAJESH KUMAR K -
+SCOPE
+27-Jun-2026 10:30
+Registered and Approved`;
 
-function renderRecents(justAdded = false) {
-  const list = getRecents();
-  const el = $("#recent-list");
-  if (!el) return;
-  if (!list.length) {
-    el.innerHTML = '<p class="hint">courses you paste will show up here.</p>';
-    return;
+$("#btn-fill-sample-timetable")?.addEventListener("click", () => {
+  const uploadArea = $("#raw-upload");
+  if (uploadArea) {
+    uploadArea.value = SAMPLE_REGISTRATION_DATA;
+    toast("Sample registration data loaded ✦ Click 'Parse & Synchronize'");
   }
-  el.innerHTML = list.map((r, i) => `
-    <div class="recent-item ${justAdded && i === 0 ? "new" : ""}">
-      <div><b>${r.courses.length} course${r.courses.length === 1 ? "" : "s"} added</b>
-        <div class="meta-line">${r.courses.slice(0, 4).map(esc).join(", ")}${r.courses.length > 4 ? " …" : ""}</div></div>
-      <small class="meta-line">${esc(r.at)}</small>
-    </div>`).join("");
-}
+});
 
 const uploadBtn = $("#upload-btn");
 if (uploadBtn) {
   uploadBtn.addEventListener("click", async () => {
     try {
       const res = await api("POST", "/api/timetable/upload", { raw_text: $("#raw-upload").value });
-      if (res.warnings && res.warnings.length)
-        toast(`saved ${res.saved_courses.length} courses — ⚠ ${res.warnings.length} slot clash${res.warnings.length > 1 ? "es" : ""}`, true);
-      else
-        toast(`saved ${res.saved_courses.length} courses ✦`);
+      if (res.warnings && res.warnings.length) {
+        toast(`Synchronized ${res.saved_courses.length} courses (⚠ ${res.warnings.length} slot clash)`, true);
+      } else {
+        toast(`Synchronized ${res.saved_courses.length} courses successfully ✦`);
+      }
       showView("timetable");
-    } catch (err) { toast(err.message, true); }
+    } catch (err) {
+      toast(err.message, true);
+    }
   });
 }
 
 async function loadGrid() {
   let g;
-  try { g = await api("GET", "/api/timetable/grid"); }
-  catch (e) {
+  try {
+    g = await api("GET", "/api/timetable/grid");
+  } catch (e) {
     if ($("#grid-table")) {
       $("#grid-table").innerHTML =
-        `<tr><td><div class="cell free">could not load grid: ${esc(e.message)} — try re-pasting your registration</div></td></tr>`;
+        `<tr><td><div class="cell free" style="padding:24px; text-align:center;">Could not load timetable: ${esc(e.message)} — try pasting your registration in 'Add Courses'.</div></td></tr>`;
     }
     return;
   }
   if (!g.grid_view || !g.theory_slots) {
     if ($("#grid-table")) {
       $("#grid-table").innerHTML =
-        '<tr><td><div class="cell free">timetable format updated — please re-paste your registration in “add courses”.</div></td></tr>';
+        '<tr><td><div class="cell free" style="padding:24px; text-align:center;">No courses synchronized yet — click "Add Courses" or load sample data.</div></td></tr>';
     }
     return;
   }
 
   const T = g.theory_slots;
-
-  // header: DAY | TYPE | 6 morning | LUNCH | 6 afternoon
-  let html = "<tr><th>day</th><th>type</th>"
+  let html = "<tr><th>DAY</th><th>TIER</th>"
     + T.slice(0, 6).map((t) => `<th>${t}</th>`).join("")
-    + '<th class="lunch-col">lunch</th>'
+    + '<th class="lunch-col">LUNCH</th>'
     + T.slice(6).map((t) => `<th>${t}</th>`).join("") + "</tr>";
 
   const cellHtml = (c) => {
     if (!c.occupied) return c.token ? esc(c.token) : "·";
     const d = c.data;
-    const tip = `${d.course_code || ""} \u2014 ${d.course_title || ""}\nFaculty: ${d.faculty || "TBD"}\nVenue: ${d.venue || "TBD"}\nSlot: ${d.slot_token || d.token || ""}`;
+    const tip = `${d.course_code || ""} — ${d.course_title || ""}\nFaculty: ${d.faculty || "TBD"}\nVenue: ${d.venue || "TBD"}\nSlot: ${d.slot_token || d.token || ""}`;
     return `<span class="tt-tip" data-tip="${esc(tip)}" tabindex="0">${esc(d.course_title)}</span><small>${esc(d.venue || "")}</small>`;
   };
 
-  const mkTd = (c) =>
-    `<td class="${c.occupied ? "occ" : "free"}">${cellHtml(c)}</td>`;
+  const mkTd = (c) => `<td class="${c.occupied ? "occ" : "free"}">${cellHtml(c)}</td>`;
 
   const rowCells = (row) =>
     row.slice(0, 6).map(mkTd).join("")
@@ -259,17 +559,14 @@ async function loadGrid() {
   if ($("#grid-table")) $("#grid-table").innerHTML = html;
 }
 
-function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
-
-/* ---------- classmates ---------- */
-const REL_LABEL = { MUTUAL: "mutual ✓", FOLLOWING: "following", REQUESTED: "requested…" };
-
+/* --------------------------------------------------------------------------
+   9. CLASSMATES & SOCIAL RADAR
+   -------------------------------------------------------------------------- */
 async function loadRequests() {
   try {
     const res = await api("GET", "/api/social/requests");
     const count = res.requests ? res.requests.length : 0;
 
-    // Update WhatsApp-style green round badge on Social nav tab
     const navBadge = $("#nav-badge-social");
     if (navBadge) {
       if (count > 0) {
@@ -287,17 +584,19 @@ async function loadRequests() {
         ? res.requests.map((r) => `
           <div class="glass card req-card" data-sid="${r.student_id}">
             <div class="avatar" style="background:${avatarColor(r.name)}">${esc(r.name[0] || "?")}</div>
-            <div class="card-main"><b>${esc(r.name)}</b><div class="meta-line">wants to follow you</div></div>
-            <button class="btn btn-primary req-accept">accept</button>
-            <button class="btn btn-secondary req-reject">reject</button>
+            <div class="card-main"><b>${esc(r.name)}</b><div class="meta-line">Wants to synchronize with your timetable</div></div>
+            <button class="btn btn-primary req-accept">Accept</button>
+            <button class="btn btn-secondary req-reject">Decline</button>
           </div>`).join("")
-        : '<p class="hint">no pending requests.</p>';
+        : '<p class="hint">No pending requests.</p>';
     };
     renderInto($("#req-list"), $("#req-count"));
     renderInto($("#req-list-social"), $("#req-count-social"));
-    document.querySelectorAll(".req-accept").forEach((b) => b.addEventListener("click", () => answerRequest(b, true)));
-    document.querySelectorAll(".req-reject").forEach((b) => b.addEventListener("click", () => answerRequest(b, false)));
-  } catch (err) { console.error("loadRequests error:", err); }
+    $$(".req-accept").forEach((b) => b.addEventListener("click", () => answerRequest(b, true)));
+    $$(".req-reject").forEach((b) => b.addEventListener("click", () => answerRequest(b, false)));
+  } catch (err) {
+    console.error("loadRequests error:", err);
+  }
 }
 
 async function answerRequest(btn, accept) {
@@ -306,10 +605,13 @@ async function answerRequest(btn, accept) {
   try {
     await api("POST", `/api/social/requests/${accept ? "accept" : "reject"}`,
               { student_id: card.dataset.sid });
-    document.querySelectorAll(`.req-card[data-sid="${card.dataset.sid}"]`).forEach((c) => c.remove());
-    toast(accept ? "request accepted — say hi 👋" : "request declined");
+    $$(`.req-card[data-sid="${card.dataset.sid}"]`).forEach((c) => c.remove());
+    toast(accept ? "Request accepted — timetable comparison unlocked 👋" : "Request declined");
     loadRequests();
-  } catch (err) { toast(err.message, true); }
+    loadSocial();
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
 let CM_DATA = { courses: [], classmates: [] };
@@ -321,7 +623,9 @@ async function findClassmates() {
     CM_DATA = { courses: res.my_courses || [], classmates: res.classmates || [] };
     renderCourseTabs();
     renderPeers();
-  } catch (err) { toast(err.message, true); }
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
 function renderCourseTabs() {
@@ -334,9 +638,9 @@ function renderCourseTabs() {
   const tabsEl = $("#course-tabs");
   if (!tabsEl) return;
   tabsEl.innerHTML =
-    tab("ALL", "all classmates", CM_DATA.classmates.length)
+    tab("ALL", "All Classmates", CM_DATA.classmates.length)
     + CM_DATA.courses.map((c) => tab(c.course, `${c.course} · ${c.slot}`, counts[c.course] || 0)).join("");
-  document.querySelectorAll(".course-tab").forEach((b) =>
+  $$(".course-tab").forEach((b) =>
     b.addEventListener("click", () => { selectedCourse = b.dataset.course; renderCourseTabs(); renderPeers(); }));
 }
 
@@ -346,13 +650,13 @@ function renderPeers() {
     : CM_DATA.classmates.filter((m) => m.classes.some((c) => c.course === selectedCourse));
   if ($("#peers-title")) {
     $("#peers-title").textContent = selectedCourse === "ALL"
-      ? "all classmates" : `classmates · ${selectedCourse}`;
+      ? "Classmate Radar" : `Classmates · ${selectedCourse}`;
   }
   const resultsEl = $("#cm-results");
   if (resultsEl) {
     resultsEl.innerHTML = peers.length
       ? peers.map(classmateCard).join("")
-      : emptyState("no classmates in this course yet.");
+      : '<div class="glass card"><div class="meta-line">No classmates detected in this course yet.</div></div>';
   }
   bindFollowButtons();
 }
@@ -360,15 +664,15 @@ function renderPeers() {
 function relButton(rel) {
   switch (rel) {
     case "MUTUAL":
-      return '<button class="btn btn-secondary follow-btn is-following is-mutual" data-rel="MUTUAL" title="Mutual follow · Click to unfollow"><span class="btn-text">mutual ✓</span><span class="btn-hover-text">unfollow</span></button>';
+      return '<button class="btn btn-secondary follow-btn is-following is-mutual" data-rel="MUTUAL" title="Mutual follow · Click to unfollow"><span class="btn-text">Mutual ✓</span><span class="btn-hover-text">Unfollow</span></button>';
     case "FOLLOWING":
-      return '<button class="btn btn-secondary follow-btn is-following" data-rel="FOLLOWING" title="Following · Click to unfollow"><span class="btn-text">following ✓</span><span class="btn-hover-text">unfollow</span></button>';
+      return '<button class="btn btn-secondary follow-btn is-following" data-rel="FOLLOWING" title="Following · Click to unfollow"><span class="btn-text">Following ✓</span><span class="btn-hover-text">Unfollow</span></button>';
     case "REQUESTED":
-      return '<button class="btn btn-secondary follow-btn is-requested" data-rel="REQUESTED" title="Request pending · Click to cancel"><span class="btn-text">requested…</span><span class="btn-hover-text">cancel ✕</span></button>';
+      return '<button class="btn btn-secondary follow-btn is-requested" data-rel="REQUESTED" title="Request pending · Click to cancel"><span class="btn-text">Requested…</span><span class="btn-hover-text">Cancel ✕</span></button>';
     case "FOLLOWS_YOU":
-      return '<button class="btn btn-primary follow-btn is-follow-back" data-rel="FOLLOWS_YOU" title="Follows you · Click to follow back"><span class="btn-text">follow back ↩</span></button>';
+      return '<button class="btn btn-primary follow-btn is-follow-back" data-rel="FOLLOWS_YOU" title="Follows you · Click to follow back"><span class="btn-text">Follow Back ↩</span></button>';
     default:
-      return '<button class="btn btn-primary follow-btn is-none" data-rel="NONE"><span class="btn-text">+ follow</span></button>';
+      return '<button class="btn btn-primary follow-btn is-none" data-rel="NONE"><span class="btn-text">+ Follow</span></button>';
   }
 }
 
@@ -381,7 +685,7 @@ function classmateCard(m) {
 }
 
 function bindFollowButtons() {
-  document.querySelectorAll(".follow-btn").forEach((btn) =>
+  $$(".follow-btn").forEach((btn) =>
     btn.addEventListener("click", async () => {
       const card = btn.closest(".card");
       if (!card) return;
@@ -395,51 +699,51 @@ function bindFollowButtons() {
             btn.className = "btn btn-primary follow-btn is-follow-back";
             btn.dataset.rel = "FOLLOWS_YOU";
             btn.title = "Follows you · Click to follow back";
-            btn.innerHTML = '<span class="btn-text">follow back ↩</span>';
+            btn.innerHTML = '<span class="btn-text">Follow Back ↩</span>';
           } else {
             btn.className = "btn btn-primary follow-btn is-none";
             btn.dataset.rel = "NONE";
             btn.title = "";
-            btn.innerHTML = '<span class="btn-text">+ follow</span>';
+            btn.innerHTML = '<span class="btn-text">+ Follow</span>';
           }
           if (CM_DATA && CM_DATA.classmates) {
             CM_DATA.classmates.forEach((m) => { if (m.student_id === sid) m.rel = res.status; });
           }
-          toast("unfollowed");
+          toast("Unfollowed");
         } else {
           const res = await api("POST", "/api/social/follow", { student_id: sid });
           if (res.status === "MUTUAL") {
             btn.className = "btn btn-secondary follow-btn is-following is-mutual";
             btn.dataset.rel = "MUTUAL";
             btn.title = "Mutual follow · Click to unfollow";
-            btn.innerHTML = '<span class="btn-text">mutual ✓</span><span class="btn-hover-text">unfollow</span>';
-            toast("mutual follow ✓");
+            btn.innerHTML = '<span class="btn-text">Mutual ✓</span><span class="btn-hover-text">Unfollow</span>';
+            toast("Mutual follow unlocked ✓");
           } else {
             btn.className = "btn btn-secondary follow-btn is-requested";
             btn.dataset.rel = "REQUESTED";
             btn.title = "Request pending · Click to cancel";
-            btn.innerHTML = '<span class="btn-text">requested…</span><span class="btn-hover-text">cancel ✕</span>';
-            toast("follow request sent 👋");
+            btn.innerHTML = '<span class="btn-text">Requested…</span><span class="btn-hover-text">Cancel ✕</span>';
+            toast("Follow request sent 👋");
           }
           if (CM_DATA && CM_DATA.classmates) {
             CM_DATA.classmates.forEach((m) => { if (m.student_id === sid) m.rel = res.status; });
           }
         }
         loadSocial();
-      } catch (err) { toast(err.message, true); }
+      } catch (err) {
+        toast(err.message, true);
+      }
     }));
 }
 
-function emptyState(msg) { return `<div class="glass card"><div class="meta-line">${msg}</div></div>`; }
-
-/* ---------- social / chat ---------- */
+/* --------------------------------------------------------------------------
+   10. SOCIAL NETWORK & COMPARE MATRIX
+   -------------------------------------------------------------------------- */
 async function loadSocial() {
   try {
     const [net, reqs] = await Promise.all([
       api("GET", "/api/social/followers"), api("GET", "/api/social/requests")]);
     const mutualIds = new Set(net.mutual || []);
-    const people = {};
-    [...(net.followers || []), ...(net.following || [])].forEach((u) => (people[u.student_id] = u.name));
 
     const statCol = $("#network-stats");
     if (statCol) statCol.innerHTML = [
@@ -450,19 +754,17 @@ async function loadSocial() {
     const tipFor = (u) => [
       u.email ? `\u2709 ${u.email}` : "",
       u.phone ? `\u260e ${u.phone}` : "",
-      u.instagram ? `instagram: @${u.instagram}` : "",
-      u.facebook ? `facebook: ${u.facebook}` : "",
+      u.instagram ? `Instagram: @${u.instagram}` : "",
       u.bio ? `\n${u.bio}` : "",
-    ].filter(Boolean).join("\n") || "no details shared yet";
+    ].filter(Boolean).join("\n") || "No details shared yet";
 
-    // Followers row: shows 'follow back' if not mutual, or 'unfollow' if mutual
     const followerRow = (u) => {
       const isMutual = mutualIds.has(u.student_id);
       const tag = isMutual ? "MUTUAL" : "FOLLOWS YOU";
       const t = tipFor(u).replace(/"/g, "&quot;");
       const actionBtn = isMutual
-        ? `<button class="social-action-btn social-unfollow-btn" data-sid="${u.student_id}" data-name="${esc(u.name)}" title="Unfollow">unfollow</button>`
-        : `<button class="social-action-btn social-follow-back-btn" data-sid="${u.student_id}" data-name="${esc(u.name)}" title="Follow back">follow back ↩</button>`;
+        ? `<button class="social-action-btn social-unfollow-btn" data-sid="${u.student_id}" data-name="${esc(u.name)}" title="Unfollow">Unfollow</button>`
+        : `<button class="social-action-btn social-follow-back-btn" data-sid="${u.student_id}" data-name="${esc(u.name)}" title="Follow back">Follow Back ↩</button>`;
 
       return `<div class="people-row"><div class="avatar sm" style="background:${avatarColor(u.name)}">${esc(u.name[0] || "?")}</div>
         <span class="tt-tip" data-tip="${t}" tabindex="0">${esc(u.name)}</span>
@@ -471,12 +773,11 @@ async function loadSocial() {
       </div>`;
     };
 
-    // Following row: always allows 'unfollow'
     const followingRow = (u) => {
       const isMutual = mutualIds.has(u.student_id);
       const tag = isMutual ? "MUTUAL" : "YOU FOLLOW";
       const t = tipFor(u).replace(/"/g, "&quot;");
-      const actionBtn = `<button class="social-action-btn social-unfollow-btn" data-sid="${u.student_id}" data-name="${esc(u.name)}" title="Unfollow">unfollow</button>`;
+      const actionBtn = `<button class="social-action-btn social-unfollow-btn" data-sid="${u.student_id}" data-name="${esc(u.name)}" title="Unfollow">Unfollow</button>`;
 
       return `<div class="people-row"><div class="avatar sm" style="background:${avatarColor(u.name)}">${esc(u.name[0] || "?")}</div>
         <span class="tt-tip" data-tip="${t}" tabindex="0">${esc(u.name)}</span>
@@ -488,45 +789,45 @@ async function loadSocial() {
     const box = (el, list, isFollowersList) => {
       if (el) el.innerHTML = list && list.length
         ? list.map(isFollowersList ? followerRow : followingRow).join("")
-        : '<p class="hint">none yet.</p>';
+        : '<p class="hint">None yet.</p>';
     };
 
     box($("#followers-box"), net.followers, true);
     box($("#following-box"), net.following, false);
 
-    // Bind social action buttons (unfollow & follow-back)
-    document.querySelectorAll(".social-unfollow-btn").forEach((b) => {
+    $$(".social-unfollow-btn").forEach((b) => {
       b.addEventListener("click", async (e) => {
         e.stopPropagation();
         const sid = b.dataset.sid;
         const name = b.dataset.name || "user";
         try {
           await api("POST", "/api/social/unfollow", { student_id: sid });
-          toast(`unfollowed ${name}`);
+          toast(`Unfollowed ${name}`);
           loadSocial();
-          loadClassmates();
+          findClassmates();
         } catch (err) { toast(err.message, true); }
       });
     });
 
-    document.querySelectorAll(".social-follow-back-btn").forEach((b) => {
+    $$(".social-follow-back-btn").forEach((b) => {
       b.addEventListener("click", async (e) => {
         e.stopPropagation();
         const sid = b.dataset.sid;
         const name = b.dataset.name || "user";
         try {
           await api("POST", "/api/social/follow", { student_id: sid });
-          toast(`follow request sent to ${name} 👋`);
+          toast(`Follow request sent to ${name} 👋`);
           loadSocial();
-          loadClassmates();
+          findClassmates();
         } catch (err) { toast(err.message, true); }
       });
     });
 
-  } catch (err) { toast(err.message, true); }
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
-/* ---------- compare ---------- */
 async function loadCompare() {
   try {
     const net = await api("GET", "/api/social/followers");
@@ -540,20 +841,20 @@ async function loadCompare() {
 
     const el = $("#cmp-peers");
     if (!uniqPeers.length) {
-      if (el) el.innerHTML = '<p class="hint">follow classmates or accept requests to compare timetables.</p>';
-      if ($("#cmp-result-wrap")) $("#cmp-result-wrap").classList.add("hidden");
+      if (el) el.innerHTML = '<p class="hint">Follow classmates or accept follow requests to compare timetables.</p>';
+      $("#cmp-result-wrap")?.classList.add("hidden");
       return;
     }
-    if ($("#cmp-result-wrap")) $("#cmp-result-wrap").classList.remove("hidden");
+    $("#cmp-result-wrap")?.classList.remove("hidden");
     if (el) {
       el.innerHTML = uniqPeers.map((p, i) => `
         <button class="course-tab cmp-peer-btn ${i === 0 ? "active" : ""}" data-sid="${p.student_id}">
           <span>${esc(p.name)}</span>
         </button>`).join("");
 
-      document.querySelectorAll(".cmp-peer-btn").forEach((btn) => {
+      $$(".cmp-peer-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          document.querySelectorAll(".cmp-peer-btn").forEach((b) => b.classList.remove("active"));
+          $$(".cmp-peer-btn").forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
           compareWith(btn.dataset.sid);
         });
@@ -563,29 +864,31 @@ async function loadCompare() {
     if (uniqPeers.length) {
       compareWith(uniqPeers[0].student_id);
     }
-  } catch (err) { toast(err.message, true); }
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
 async function compareWith(peerId) {
   try {
     const data = await api("GET", `/api/social/compare/${peerId}`);
-    if ($("#cmp-title")) $("#cmp-title").textContent = `comparison with ${data.peer.name}`;
+    if ($("#cmp-title")) $("#cmp-title").textContent = `Comparison with ${data.peer.name}`;
 
     const s = data.summary || { common: 0, both_busy: 0, mine: 0, theirs: 0, both_free: 0 };
     if ($("#cmp-summary")) {
       $("#cmp-summary").innerHTML = `
-        <div class="stat"><div class="n">${s.common}</div><div class="l">same class</div></div>
-        <div class="stat"><div class="n">${s.both_busy}</div><div class="l">both busy</div></div>
-        <div class="stat"><div class="n">${s.mine}</div><div class="l">only me</div></div>
-        <div class="stat"><div class="n">${s.theirs}</div><div class="l">only them</div></div>
-        <div class="stat"><div class="n">${s.both_free}</div><div class="l">both free</div></div>
+        <div class="stat"><div class="n">${s.common}</div><div class="l">Same Class</div></div>
+        <div class="stat"><div class="n">${s.both_busy}</div><div class="l">Both Busy</div></div>
+        <div class="stat"><div class="n">${s.mine}</div><div class="l">Only Me</div></div>
+        <div class="stat"><div class="n">${s.theirs}</div><div class="l">Only Them</div></div>
+        <div class="stat"><div class="n">${s.both_free}</div><div class="l">Both Free</div></div>
       `;
     }
 
     const T = data.time_slots || [];
-    let html = "<tr><th>day</th>"
+    let html = "<tr><th>DAY</th>"
       + T.slice(0, 6).map((t) => `<th>${t}</th>`).join("")
-      + '<th class="lunch-col">lunch</th>'
+      + '<th class="lunch-col">LUNCH</th>'
       + T.slice(6).map((t) => `<th>${t}</th>`).join("") + "</tr>";
 
     for (const block of (data.grid || [])) {
@@ -601,10 +904,10 @@ async function compareWith(peerId) {
           return `<td class="cmp-busy">●●</td>`;
         }
         if (c.state === "mine") {
-          return `<td class="cmp-mine">you</td>`;
+          return `<td class="cmp-mine">You</td>`;
         }
         if (c.state === "theirs") {
-          return `<td class="cmp-theirs">them</td>`;
+          return `<td class="cmp-theirs">Them</td>`;
         }
         return `<td class="cmp-free">·</td>`;
       };
@@ -615,15 +918,19 @@ async function compareWith(peerId) {
       html += "</tr>";
     }
     if ($("#cmp-table")) $("#cmp-table").innerHTML = html;
-  } catch (err) { toast(err.message, true); }
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
-/* ---------- market (sell / buy) ---------- */
+/* --------------------------------------------------------------------------
+   11. SLOT EXCHANGE MARKETPLACE (ACID ENGINE)
+   -------------------------------------------------------------------------- */
 let MY_CLASSES = [];
 
-document.querySelectorAll("[data-market-tab]").forEach((btn) =>
+$$("[data-market-tab]").forEach((btn) =>
   btn.addEventListener("click", () => {
-    document.querySelectorAll("[data-market-tab]").forEach((b) => b.classList.remove("active"));
+    $$("[data-market-tab]").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     $("#mkt-sell").classList.toggle("hidden", btn.dataset.marketTab !== "sell");
     $("#mkt-buy").classList.toggle("hidden", btn.dataset.marketTab !== "buy");
@@ -639,10 +946,12 @@ async function loadSwap() {
       sel.innerHTML = MY_CLASSES.length
         ? MY_CLASSES.map((c, i) =>
             `<option value="${i}">${esc(c.course)} \u00b7 ${esc(c.slot_tokens.join("+"))} @ ${esc(c.venue || "?")}</option>`).join("")
-        : '<option value="">\u2014 add courses first \u2014</option>';
+        : '<option value="">— Add courses to your timetable first —</option>';
     }
     renderMyListings(mine || []);
-  } catch (err) { toast(err.message, true); }
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
 function renderMyListings(listings) {
@@ -650,32 +959,32 @@ function renderMyListings(listings) {
   if (!el) return;
   el.innerHTML = listings.length
     ? listings.map((l) => `
-      <div class="my-listing-item" data-lid="${l.listing_id}">
+      <div class="my-listing-item" data-lid="${l.listing_id}" style="display:flex; gap:6px; margin-bottom:6px;">
         <button class="course-tab my-listing-btn" data-lid="${l.listing_id}">
           <span>${esc(l.offered_course_code)} \u00b7 ${(l.desired_slot_tokens || []).length ? "wants " + esc(l.desired_slot_tokens.join("+")) : "any slot"}</span>
           <small>${l.interest_count} \u{1F44B}</small>
         </button>
-        <button class="del-listing-btn" data-lid="${l.listing_id}" title="Remove this course from the market">✕</button>
+        <button class="btn btn-secondary del-listing-btn" data-lid="${l.listing_id}" title="Remove listing" style="padding:8px 12px;">✕</button>
       </div>`).join("")
-    : '<p class="hint">nothing listed yet.</p>';
+    : '<p class="hint">Nothing listed yet.</p>';
 
-  document.querySelectorAll(".my-listing-btn").forEach((b) =>
+  $$(".my-listing-btn").forEach((b) =>
     b.addEventListener("click", () => showInterests(+b.dataset.lid, b.querySelector("span").textContent)));
 
-  document.querySelectorAll(".del-listing-btn").forEach((b) =>
+  $$(".del-listing-btn").forEach((b) =>
     b.addEventListener("click", async (e) => {
       e.stopPropagation();
       const lid = +b.dataset.lid;
       try {
         await api("DELETE", `/api/swap/list/${lid}`);
-        toast("course removed from market");
+        toast("Course listing removed from market");
         loadSwap();
       } catch (err) { toast(err.message, true); }
     }));
 }
 
 async function showInterests(lid, label) {
-  if ($("#int-title")) $("#int-title").textContent = `requests \u00b7 ${label}`;
+  if ($("#int-title")) $("#int-title").textContent = `Requests \u00b7 ${label}`;
   try {
     const res = await api("GET", `/api/swap/list/${lid}/interests`);
     const pane = $("#interest-pane");
@@ -684,32 +993,32 @@ async function showInterests(lid, label) {
         ? res.requests.map((r) => `
           <div class="people-row"><div class="avatar sm" style="background:${avatarColor(r.name)}">${esc(r.name[0] || "?")}</div>
             <span>${esc(r.name)}</span><small class="tag you-follow">WANTS YOUR SLOT</small></div>`).join("")
-        : '<p class="hint">no one has requested this slot yet.</p>';
+        : '<p class="hint">No one has requested this slot listing yet.</p>';
     }
-  } catch (err) { toast(err.message, true); }
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
-const swCreateBtn = $("#sw-create");
-if (swCreateBtn) {
-  swCreateBtn.addEventListener("click", async () => {
-    const selVal = $("#sw-class") ? $("#sw-class").value : "";
-    const c = MY_CLASSES[selVal];
-    if (!c) return toast("add courses to your timetable first", true);
-    try {
-      await api("POST", "/api/swap/list", {
-        offered_class_id: c.class_id,
-        offered_course_code: c.course,
-        desired_course_code: $("#sw-want-course").value.trim().toUpperCase(),
-        desired_slot_tokens: $("#sw-want-slots").value.split("+")
-          .map((t) => t.trim().toUpperCase()).filter(Boolean),
-      });
-      toast(`${c.course} (${c.slot_tokens.join("+")}) is on the market ⇄`);
-      loadSwap();
-    } catch (err) { toast(err.message, true); }
-  });
-}
+$("#sw-create")?.addEventListener("click", async () => {
+  const selVal = $("#sw-class") ? $("#sw-class").value : "";
+  const c = MY_CLASSES[selVal];
+  if (!c) return toast("Add courses to your timetable first", true);
+  try {
+    await api("POST", "/api/swap/list", {
+      offered_class_id: c.class_id,
+      offered_course_code: c.course,
+      desired_course_code: $("#sw-want-course").value.trim().toUpperCase(),
+      desired_slot_tokens: $("#sw-want-slots").value.split("+")
+        .map((t) => t.trim().toUpperCase()).filter(Boolean),
+    });
+    toast(`${c.course} (${c.slot_tokens.join("+")}) published to slot market ⇄`);
+    loadSwap();
+  } catch (err) {
+    toast(err.message, true);
+  }
+});
 
-/* ---- buy tab ---- */
 let MK_LISTINGS = [];
 async function searchMarket() {
   try {
@@ -722,24 +1031,25 @@ async function searchMarket() {
     if (el) {
       el.innerHTML = res.count
         ? res.listings.map((l) => `
-          <button class="course-tab mk-item" data-lid="${l.listing_id}">
+          <button class="course-tab mk-item" data-lid="${l.listing_id}" style="margin-bottom:6px;">
             <span>${esc(l.course)} · ${esc(l.faculty || "TBD")}</span>
             <small>${esc(l.slot_tokens.join("+"))}${l.kinds.includes("LAB") ? " LAB" : ""}</small>
           </button>`).join("")
-        : '<p class="hint">no listings match your search.</p>';
-      document.querySelectorAll(".mk-item").forEach((b) =>
+        : '<p class="hint">No listings match your search.</p>';
+      $$(".mk-item").forEach((b) =>
         b.addEventListener("click", () => {
-          document.querySelectorAll(".mk-item").forEach((x) => x.classList.remove("active"));
+          $$(".mk-item").forEach((x) => x.classList.remove("active"));
           b.classList.add("active");
           showMkDetail(+b.dataset.lid);
         }));
     }
-  } catch (err) { toast(err.message, true); }
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
-const mkSearchBtn = $("#mk-search");
-if (mkSearchBtn) mkSearchBtn.addEventListener("click", searchMarket);
-const mkQInput = $("#mk-q");
-if (mkQInput) mkQInput.addEventListener("keydown", (e) => e.key === "Enter" && searchMarket());
+
+$("#mk-search")?.addEventListener("click", searchMarket);
+$("#mk-q")?.addEventListener("keydown", (e) => e.key === "Enter" && searchMarket());
 
 function showMkDetail(lid) {
   const l = MK_LISTINGS.find((x) => x.listing_id === lid);
@@ -751,28 +1061,33 @@ function showMkDetail(lid) {
   if ($("#mk-detail")) {
     $("#mk-detail").innerHTML = `
       <h2 style="margin-bottom:4px">${esc(l.course)} — ${esc(l.course_title)}</h2>
-      <div class="meta-line" style="margin-bottom:10px">
+      <div class="meta-line" style="margin-bottom:12px">
         ${l.slot_tokens.map((t) => `<span class="chip">${esc(t)}</span>`).join("")}</div>
-      <div class="stat-row">
-        <div class="stat"><div class="n" style="font-size:14px">${esc(l.faculty || "TBD")}</div><div class="l">faculty</div></div>
-        <div class="stat"><div class="n" style="font-size:14px">${esc(l.venue || "TBD")}</div><div class="l">venue</div></div>
-        <div class="stat"><div class="n" style="font-size:14px">${esc(l.peer_name)}</div><div class="l">listed by</div></div>
+      <div class="stat-row" style="margin-bottom:14px;">
+        <div class="stat"><div class="n" style="font-size:15px">${esc(l.faculty || "TBD")}</div><div class="l">Faculty</div></div>
+        <div class="stat"><div class="n" style="font-size:15px">${esc(l.venue || "TBD")}</div><div class="l">Venue</div></div>
+        <div class="stat"><div class="n" style="font-size:15px">${esc(l.peer_name)}</div><div class="l">Listed By</div></div>
       </div>
-      <p class="hint" style="margin-bottom:10px">wants in return:
+      <p class="hint" style="margin-bottom:14px">Wants in exchange:
         <b>${esc(l.desired_course_code)}</b>
         ${(l.desired_slot_tokens || []).map((t) => `<span class="chip">${esc(t)}</span>`).join("") || "(any slot)"}</p>
-      <button id="mk-request" class="btn btn-primary">I want this slot 🙋</button>`;
+      <button id="mk-request" class="btn btn-primary">
+        <span>Request This Slot 🙋</span>
+      </button>`;
     $("#mk-request").addEventListener("click", async () => {
       try {
         const out = await api("POST", `/api/swap/list/${lid}/interest`);
-        toast(out.interested ? "request sent to the seller ✦" : "request withdrawn");
-      } catch (err) { toast(err.message, true); }
+        toast(out.interested ? "Trade interest notified to the student ✦" : "Request withdrawn");
+      } catch (err) {
+        toast(err.message, true);
+      }
     });
   }
 }
 
-/* ---------- profile ---------- */
-
+/* --------------------------------------------------------------------------
+   12. PROFILE & IDENTITY MANAGEMENT
+   -------------------------------------------------------------------------- */
 function updateAge() {
   const v = $("#pf-dob").value;
   const el = $("#pf-age");
@@ -783,7 +1098,9 @@ function updateAge() {
   if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
   el.textContent = age >= 0 && age < 130 ? `${age} yrs` : "";
 }
+
 $("#pf-dob")?.addEventListener("change", updateAge);
+
 async function loadProfile() {
   try {
     const me = await api("GET", "/api/auth/me");
@@ -793,40 +1110,45 @@ async function loadProfile() {
     if ($("#pf-insta")) $("#pf-insta").value = me.instagram || "";
     if ($("#pf-fb")) $("#pf-fb").value = me.facebook || "";
     if ($("#pf-linkedin")) $("#pf-linkedin").value = me.linkedin || "";
+    if ($("#pf-github")) $("#pf-github").value = me.github || "";
     if ($("#pf-reddit")) $("#pf-reddit").value = me.reddit || "";
     if ($("#pf-bio")) $("#pf-bio").value = me.bio || "";
-  } catch (err) { toast(err.message, true); }
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
-const pfSaveBtn = $("#pf-save");
-if (pfSaveBtn) {
-  pfSaveBtn.addEventListener("click", async () => {
-    try {
-      await api("POST", "/api/auth/profile", {
-        name: $("#pf-name") ? $("#pf-name").value.trim() : "",
-        email: $("#pf-email") ? $("#pf-email").value.trim() : "",
-        phone: $("#pf-phone") ? $("#pf-phone").value.trim() : "",
-        instagram: $("#pf-insta") ? $("#pf-insta").value.trim() : "",
-        facebook: $("#pf-fb") ? $("#pf-fb").value.trim() : "",
-        linkedin: $("#pf-linkedin") ? $("#pf-linkedin").value.trim() : "",
-        reddit: $("#pf-reddit") ? $("#pf-reddit").value.trim() : "",
-        bio: $("#pf-bio") ? $("#pf-bio").value : "",
-      });
-      ME = await api("GET", "/api/auth/me");
-      if ($("#menu-name")) $("#menu-name").textContent = ME.name;
-      toast("profile saved ✦");
-    } catch (err) { toast(err.message, true); }
-  });
-}
+$("#pf-save")?.addEventListener("click", async () => {
+  try {
+    await api("POST", "/api/auth/profile", {
+      name: $("#pf-name") ? $("#pf-name").value.trim() : "",
+      email: $("#pf-email") ? $("#pf-email").value.trim() : "",
+      phone: $("#pf-phone") ? $("#pf-phone").value.trim() : "",
+      instagram: $("#pf-insta") ? $("#pf-insta").value.trim() : "",
+      facebook: $("#pf-fb") ? $("#pf-fb").value.trim() : "",
+      linkedin: $("#pf-linkedin") ? $("#pf-linkedin").value.trim() : "",
+      github: $("#pf-github") ? $("#pf-github").value.trim() : "",
+      reddit: $("#pf-reddit") ? $("#pf-reddit").value.trim() : "",
+      bio: $("#pf-bio") ? $("#pf-bio").value : "",
+    });
+    ME = await api("GET", "/api/auth/me");
+    if ($("#menu-name")) $("#menu-name").textContent = ME.name;
+    toast("Profile identity saved ✦");
+  } catch (err) {
+    toast(err.message, true);
+  }
+});
 
-/* ---------- boot ---------- */
+/* --------------------------------------------------------------------------
+   13. INITIAL BOOTSTRAP
+   -------------------------------------------------------------------------- */
 (async function init() {
+  dismissLoader();
   if (TOKEN) {
     try {
       await enterApp(TOKEN);
     } catch (err) {
-      console.error("Init auth error:", err);
-      // Only clear token if server explicitly rejected credentials with 401 / 403 / Invalid token
+      console.error("Session verification error:", err);
       if (err.message && (err.message.includes("401") || err.message.includes("403") || err.message.includes("Invalid") || err.message.includes("Unauthorized"))) {
         TOKEN = null;
         localStorage.removeItem("cp_token");
