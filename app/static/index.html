@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CourseConE — Academic Intelligence &amp; Slot Trading Hub</title>
-  <link rel="stylesheet" href="/static/style.css?v=4.0">
+  <link rel="stylesheet" href="/static/style.css?v=5.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=Playfair+Display:ital,wght@1,600;1,700;1,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,600;1,700;1,800&display=swap" rel="stylesheet">
@@ -20,10 +20,15 @@
   <div class="loader-text">CourseConE · System Initializing</div>
 </div>
 
+<!-- ============ SCROLL-BACK TO HOME FLOATING HUD ============ -->
+<div id="scrollback-hint-hud" aria-hidden="true">
+  <span>↑ Scroll up to return to Home Orbit</span>
+</div>
+
 <!-- ============ SIGNATURE CURSOR LIGHT ORB (2% Cyan Touch) ============ -->
 <div id="liquid-cursor-follower" aria-hidden="true"></div>
 
-<!-- ============ DEEP SPACE CANVAS (PHOTOREALISTIC PLANET & BLINKING STARS) ============ -->
+<!-- ============ DEEP SPACE CANVAS (PHOTOREALISTIC BLACK HOLE & BLINKING STARS) ============ -->
 <canvas id="liquid-canvas" aria-hidden="true"></canvas>
 
 <!-- ============ FLOATING LIQUID GLASS TOOLTIP LENS (HOVERS ABOVE TIMETABLE) ============ -->
@@ -163,7 +168,7 @@
 
       <div class="home-scroll-hint">
         <span class="orbit-icon">⟳</span>
-        <span>Scroll to orbit planet · Click destination to enter</span>
+        <span>Scroll to orbit · Click destination to enter</span>
       </div>
     </div>
 
@@ -317,7 +322,7 @@
           <div class="panel-head">
             <div>
               <h2 class="text-gradient">Weekly Timetable Matrix</h2>
-              <p class="hint">5-Day Theory &amp; Lab Grid · Hover any course slot to inspect floating Liquid Glass lens</p>
+              <p class="hint">5-Day Theory &amp; Lab Grid · Hover any course slot to inspect floating Liquid Glass lens · Scroll up to return home</p>
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
               <button type="button" class="btn btn-secondary" id="btn-quick-palette" title="Quick Search (Ctrl+K)">
@@ -589,6 +594,6 @@
   </div> <!-- end app-content-wrapper -->
 </div>
 
-<script src="/static/app.js?v=4.0"></script>
+<script src="/static/app.js?v=5.0"></script>
 </body>
 </html>
