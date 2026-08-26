@@ -69,9 +69,9 @@
   --danger: #ef4444;
 
   /* Performance-Optimized Adaptive Blur */
-  --blur-base: blur(20px) saturate(150%);
-  --blur-elevated: blur(28px) saturate(160%);
-  --blur-subtle: blur(10px);
+  --blur-base: blur(7px) saturate(130%);      /* very light — widgets stay airy */
+  --blur-elevated: blur(10px) saturate(140%);
+  --blur-subtle: blur(5px);
 
   /* Radii & Dimensions */
   --sidebar-w: 224px;
@@ -115,6 +115,12 @@ body {
   overflow-y: auto;
   position: relative;
   line-height: 1.5;
+}
+
+/* Lock page scroll while in Planetary Spatial Mode (wheel orbits the black hole) */
+body.planetary-lock {
+  overflow: hidden;
+  height: 100vh;
 }
 
 /* Monochromatic Scrollbar */
@@ -328,7 +334,16 @@ h2 {
   align-items: center;
   padding: 40px 60px;
   pointer-events: none;
-  transition: opacity 0.4s var(--ease-out), filter 0.4s var(--ease-out), visibility 0.4s;
+  transition: opacity 0.5s var(--ease-out), filter 0.5s var(--ease-out), transform 0.55s var(--ease-out), visibility 0.4s;
+}
+
+/* Hero (Good Evening greeting) melts away on scroll-dive */
+#planetary-home-view.leaving {
+  opacity: 0;
+  visibility: hidden;
+  filter: blur(18px);
+  transform: translateY(-60px) scale(1.04);
+  pointer-events: none !important;
 }
 
 #planetary-home-view.hidden-spatial {
@@ -1108,6 +1123,101 @@ option {
   min-height: calc(100vh - 28px);
   position: relative;
   z-index: 5;
+}
+
+/* ==========================================================================
+   MODULAR VIEW ENTRANCE CHOREOGRAPHY — each module has its own signature move
+   ========================================================================== */
+.view { will-change: transform, opacity, filter; }
+.view.anim-ascend, .view.anim-slide-left, .view.anim-zoom, .view.anim-flip,
+.view.anim-split, .view.anim-rise-stagger, .view.anim-swing, .view.exit-down {
+  animation-duration: 0.75s;
+  animation-timing-function: cubic-bezier(0.22, 1.28, 0.36, 1); /* springy overshoot */
+  animation-fill-mode: both;
+}
+
+/* Timetable — pulls up from below like a carousel stage, fading into the page */
+@keyframes ascendIn {
+  0%   { opacity: 0; transform: translateY(150px) rotateX(12deg) scale(0.94); filter: blur(16px); }
+  55%  { opacity: 1; }
+  78%  { transform: translateY(-8px) rotateX(-1.5deg) scale(1.008); filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) rotateX(0) scale(1);            filter: blur(0); }
+}
+.view.anim-ascend { animation-name: ascendIn; }
+
+/* Add Courses — sweeps in from the right edge with a slight bank */
+@keyframes slideLeftIn {
+  from { opacity: 0; transform: translateX(140px) rotate3d(0, 1, 0, -14deg); }
+  to   { opacity: 1; transform: translateX(0) rotate3d(0, 1, 0, 0deg); }
+}
+.view.anim-slide-left { animation-name: slideLeftIn; }
+
+/* Classmate Radar — zoom-unfolds from deep space */
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(1.28); filter: blur(10px) brightness(1.6); }
+  60%  { filter: blur(2px) brightness(1.1); }
+  to   { opacity: 1; transform: scale(1);    filter: blur(0) brightness(1); }
+}
+.view.anim-zoom { animation-name: zoomIn; }
+
+/* Social Network — dramatic 3D flip around the X axis */
+@keyframes flipInX {
+  from { opacity: 0; transform: perspective(1200px) rotateX(52deg) translateY(60px); }
+  to   { opacity: 1; transform: perspective(1200px) rotateX(0deg) translateY(0); }
+}
+.view.anim-flip { animation-name: flipInX; }
+
+/* Compare — panels split open from a centre seam */
+@keyframes splitFromL { from { opacity: 0; transform: translateX(-90px); } to { opacity: 1; transform: none; } }
+@keyframes splitFromR { from { opacity: 0; transform: translateX(90px); }  to { opacity: 1; transform: none; } }
+.view.anim-split > *:first-child { animation: splitFromL 0.65s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.view.anim-split .grid-panel     { animation: splitFromR 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
+
+/* Profile — modular rise: panels pop up one after another */
+.view.anim-rise-stagger > * > *:nth-child(1) { animation: ascendIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0s both; }
+.view.anim-rise-stagger > * > *:nth-child(2) { animation: ascendIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
+.view.anim-rise-stagger > * > *:nth-child(n+3) { animation: ascendIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both; }
+
+/* Slot Market — pendulum swing that settles */
+@keyframes swingIn {
+  0%   { opacity: 0; transform: translateY(90px) rotate(1.6deg); transform-origin: top center; }
+  60%  { opacity: 1; transform: translateY(-8px) rotate(-0.7deg); }
+  100% { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+.view.anim-swing { animation-name: swingIn; }
+
+/* Outgoing module sinks away before the next one enters */
+@keyframes exitDown {
+  to { opacity: 0; transform: translateY(34px) scale(0.96); filter: blur(10px); }
+}
+.view.exit-down { animation-name: exitDown; animation-duration: 0.26s; animation-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+
+/* --------------------------------------------------------------------------
+   STAGGERED WIDGET CHOREOGRAPHY — glass panels inside an entering view get
+   pulled up from below and fade in, one after another
+   -------------------------------------------------------------------------- */
+@keyframes widgetRise {
+  from { opacity: 0; transform: translateY(46px) scale(0.985); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0) scale(1);         filter: blur(0); }
+}
+
+.view.anim-ascend .glass,
+.view.anim-ascend .panel,
+.view.anim-slide-left .glass,
+.view.anim-slide-left .panel,
+.view.anim-swing .glass,
+.view.anim-swing .panel {
+  animation: widgetRise 0.65s cubic-bezier(0.22, 1.28, 0.36, 1) both;
+}
+.view.anim-ascend > *:nth-child(1) .glass, .view.anim-ascend > *:nth-child(1) .panel { animation-delay: 0.05s; }
+.view.anim-ascend > *:nth-child(2) .glass, .view.anim-ascend > *:nth-child(2) .panel { animation-delay: 0.14s; }
+.view.anim-ascend > *:nth-child(n+3) .glass, .view.anim-ascend > *:nth-child(n+3) .panel { animation-delay: 0.23s; }
+.view.anim-slide-left > *:nth-child(2) .glass, .view.anim-slide-left > *:nth-child(2) .panel { animation-delay: 0.12s; }
+.view.anim-swing > *:nth-child(2) .glass, .view.anim-swing > *:nth-child(2) .panel { animation-delay: 0.12s; }
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .view, .view .glass, .view .panel { animation: none !important; }
 }
 
 #app-view.in-planetary-mode .app-content-wrapper {

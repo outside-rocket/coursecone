@@ -1,4 +1,4 @@
-# CampusPeer launcher — native PowerShell, no bash needed
+# CourseCone launcher — native PowerShell, no bash needed
 $ErrorActionPreference = "Continue"
 Set-Location $PSScriptRoot
 
@@ -25,7 +25,7 @@ if (-not $py) {
 }
 Write-Host "Using: $($py -join ' ')" -ForegroundColor DarkGray
 
-Write-Host "[1/1] Starting CampusPeer -> http://localhost:8000" -ForegroundColor Cyan
+Write-Host "[1/1] Starting CourseCone -> http://localhost:8000" -ForegroundColor Cyan
 Free-Port 8000
 Start-Sleep -Milliseconds 300
 Start-Process "http://localhost:8000"

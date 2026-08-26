@@ -1,5 +1,5 @@
 -- =====================================================================
--- CampusPeer — Academic DBMS DDL
+-- CourseCone — Academic DBMS DDL
 -- EER mapping: PERSON superclass w/ Option-8A shared-PK specialization;
 -- CLASS_OFFERING as weak entity of COURSE; multivalued slots decomposed.
 -- =====================================================================

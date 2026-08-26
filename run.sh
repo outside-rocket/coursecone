@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CampusPeer launcher (Windows Git Bash / Linux / macOS) — one server, UI included
+# CourseCone launcher (Windows Git Bash / Linux / macOS) — one server, UI included
 cd "$(dirname "$0")"
 
 kill_port() {
@@ -29,7 +29,7 @@ done
 [ -z "$PY" ] && { echo "ERROR: Python not found"; exit 1; }
 echo "Using Python: $PY"
 
-echo "[1/1] Starting CampusPeer -> http://localhost:8000"
+echo "[1/1] Starting CourseCone -> http://localhost:8000"
 kill_port 8000
 $PY -m uvicorn app.main:app --port 8000 &
 for i in $(seq 1 30); do curl -s http://localhost:8000/ >/dev/null 2>&1 && break; sleep 0.5; done

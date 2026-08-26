@@ -80,6 +80,7 @@ function dismissLoader() {
    -------------------------------------------------------------------------- */
 let planetRotation = 0;
 let scrollTargetRotation = 0;
+let diveDim = 0;   // eased darkness level for the scroll-dive
 let isDraggingPlanet = false;
 let dragStartX = 0;
 
@@ -169,11 +170,25 @@ let dragStartX = 0;
   }
 
   // Scroll & Drag to Rotate Spatial Orbit
+  // Scrolling DOWN past a threshold dives into the workspace (carousel rise).
+  // The cosmos progressively darkens as you scroll, until the TT appears.
+  let scrollEnterAccum = 0;
+  window.__diveTarget = 0;   // 0 = lit cosmos .. 1 = fully dark
   window.addEventListener("wheel", (e) => {
     if (IN_PLANETARY_MODE) {
+      e.preventDefault();
       scrollTargetRotation += e.deltaY * 0.0022;
+      if (!window.__enteringWorkspace) {
+        scrollEnterAccum = e.deltaY > 0 ? scrollEnterAccum + e.deltaY : Math.max(0, scrollEnterAccum + e.deltaY * 0.5);
+        window.__diveTarget = Math.min(1, scrollEnterAccum / 420);
+        if (scrollEnterAccum > 420) {
+          window.__enteringWorkspace = true;
+          window.__diveTarget = 1;
+          enterWorkspaceFromScroll();
+        }
+      }
     }
-  }, { passive: true });
+  }, { passive: false });
 
   window.addEventListener("pointerdown", (e) => {
     if (IN_PLANETARY_MODE && !e.target.closest(".orbital-node-card, .btn, input")) {
@@ -212,7 +227,7 @@ let dragStartX = 0;
     );
     outerCorona.addColorStop(0, "rgba(0, 240, 255, 0.18)");
     outerCorona.addColorStop(0.35, "rgba(255, 180, 50, 0.14)");
-    outerCorona.addColorStop(0.65, "rgba(0, 240, 255, 0.05)");
+    outerCorona.addColorStop(0.65, "rgba(255, 170, 90, 0.04)");
     outerCorona.addColorStop(1, "rgba(0, 0, 0, 0)");
 
     ctx.save();
@@ -270,22 +285,24 @@ let dragStartX = 0;
     ctx.stroke();
     ctx.restore();
 
-    // 3. Photon Sphere & Einstein Ring (Razor-sharp intense light orbit)
+    // 3. Photon Sphere — soft warm glow that melts into the horizon
+    //    (harsh cyan rays replaced by a smooth amber falloff)
     ctx.save();
+    const photonGlow = ctx.createRadialGradient(bhX, bhY, bhRadius * 1.0, bhX, bhY, bhRadius * 1.22);
+    photonGlow.addColorStop(0, "rgba(255, 236, 205, 0.85)");   // bright rim at horizon edge
+    photonGlow.addColorStop(0.30, "rgba(255, 190, 110, 0.35)");
+    photonGlow.addColorStop(1, "rgba(255, 160, 60, 0)");       // melts smoothly to black
     ctx.beginPath();
-    ctx.arc(bhX, bhY, bhRadius * 1.04, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.95)";
-    ctx.lineWidth = 2.5;
-    ctx.shadowColor = "#00f0ff";
-    ctx.shadowBlur = 18;
-    ctx.stroke();
+    ctx.arc(bhX, bhY, bhRadius * 1.22, 0, Math.PI * 2);
+    ctx.fillStyle = photonGlow;
+    ctx.fill();
 
     ctx.beginPath();
-    ctx.arc(bhX, bhY, bhRadius * 1.08, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(0, 240, 255, 0.6)";
-    ctx.lineWidth = 4.5;
-    ctx.shadowColor = "#00f0ff";
-    ctx.shadowBlur = 25;
+    ctx.arc(bhX, bhY, bhRadius * 1.03, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(255, 244, 225, 0.9)";
+    ctx.lineWidth = Math.max(1.5, bhRadius * 0.014);
+    ctx.shadowColor = "rgba(255, 190, 110, 0.8)";
+    ctx.shadowBlur = bhRadius * 0.12;
     ctx.stroke();
     ctx.restore();
 
@@ -328,22 +345,7 @@ let dragStartX = 0;
     ctx.filter = "blur(2.5px)";
     ctx.fill();
 
-    // Plasma swirls and matter knots revolving at relativistic speed
-    for (let k = 0; k < 12; k++) {
-      const pAngle = time * 2.2 + (k * (Math.PI / 6));
-      const px = bhX + Math.cos(pAngle) * (diskW * 0.72);
-      const py = bhY + Math.sin(pAngle) * (diskH * 0.72);
-      const isFront = Math.sin(pAngle) > -0.2;
-
-      if (isFront) {
-        ctx.beginPath();
-        ctx.arc(px, py, Math.random() * 3 + 2, 0, Math.PI * 2);
-        ctx.fillStyle = Math.cos(pAngle) < 0 ? "rgba(0, 240, 255, 0.9)" : "rgba(255, 200, 90, 0.85)";
-        ctx.shadowColor = "#00f0ff";
-        ctx.shadowBlur = 10;
-        ctx.fill();
-      }
-    }
+    // Plasma swirl dots removed — clean continuous disk instead.
     ctx.restore();
 
     // Re-draw crisp sharp event horizon over the center to maintain physical eclipse
@@ -407,6 +409,18 @@ let dragStartX = 0;
 
     // Photorealistic Black Hole Rendering
     drawPhotorealisticBlackHole();
+
+    // Scroll-dive darkening: the cosmos fades to black as you scroll down.
+    // Once the workspace has been entered, the dim PERSISTS (never returns to
+    // full brightness) until you explicitly scroll back to Planetary Orbit.
+    const targetDim = window.__workspaceDim
+      ? 0.62
+      : (IN_PLANETARY_MODE ? (window.__diveTarget || 0) : 0);
+    diveDim += (targetDim - diveDim) * 0.10;
+    if (diveDim > 0.004) {
+      ctx.fillStyle = `rgba(0, 0, 0, ${(diveDim * 0.92).toFixed(3)})`;
+      ctx.fillRect(0, 0, width, height);
+    }
 
     requestAnimationFrame(loop);
   }
@@ -667,9 +681,14 @@ function openPlanetaryHome() {
   IN_PLANETARY_MODE = true;
   CURRENT_VIEW = "home";
   hideFloatingLens();
+  document.body.classList.add("planetary-lock");
+  window.__enteringWorkspace = false;
+  window.__diveTarget = 0;   // cosmos lights back up smoothly
+  window.__workspaceDim = false;
 
   $("#app-view")?.classList.add("in-planetary-mode");
   $("#planetary-home-view")?.classList.remove("hidden-spatial");
+  $("#planetary-home-view")?.classList.remove("leaving");
   $("#app-sidebar")?.classList.add("planetary-hidden");
   $$(".view").forEach((v) => v.classList.add("hidden"));
 
@@ -681,29 +700,72 @@ function openPlanetaryHome() {
     b.classList.toggle("active", b.dataset.view === "home"));
 }
 
+/* ---- Scroll-dive: hero fades away, then the workspace carousels up ---- */
+function enterWorkspaceFromScroll() {
+  const hero = $("#planetary-home-view");
+  if (hero) hero.classList.add("leaving");   // fades the Good Evening greeting
+  window.__workspaceDim = true;              // hold the dimmed cosmos permanently
+  setTimeout(() => openAppView("timetable"), 480);
+}
+
+/* ---- Each module gets its own signature entrance animation ---- */
+const VIEW_ANIM = {
+  timetable: "anim-ascend",     // carousels up from below, de-blurring
+  upload: "anim-slide-left",    // slides in from the right edge
+  classmates: "anim-zoom",      // zoom-unfold from deep space
+  social: "anim-flip",          // 3D flip around X axis
+  compare: "anim-split",        // splits open from centre seam
+  profile: "anim-rise-stagger", // modular rise with stagger
+  swap: "anim-swing"            // pendulum swing settle
+};
+const ALL_ANIM_CLASSES = [...Object.values(VIEW_ANIM), "exit-down"];
+
 function openAppView(viewName) {
-  IN_PLANETARY_MODE = false;
-  CURRENT_VIEW = viewName;
-  hideFloatingLens();
+  const currentView = $(".view:not(.hidden)");
 
-  $("#app-view")?.classList.remove("in-planetary-mode");
-  $("#planetary-home-view")?.classList.add("hidden-spatial");
-  $("#app-sidebar")?.classList.remove("planetary-hidden");
+  const doOpen = () => {
+    IN_PLANETARY_MODE = false;
+    CURRENT_VIEW = viewName;
+    hideFloatingLens();
+    document.body.classList.remove("planetary-lock");
 
-  $$(".nav-btn[data-view]").forEach((b) =>
-    b.classList.toggle("active", b.dataset.view === viewName));
-  $$(".view").forEach((v) => v.classList.add("hidden"));
+    $("#app-view")?.classList.remove("in-planetary-mode");
+    $("#planetary-home-view")?.classList.add("hidden-spatial");
+    $("#planetary-home-view")?.classList.remove("leaving");
+    $("#app-sidebar")?.classList.remove("planetary-hidden");
 
-  const viewEl = $("#view-" + viewName);
-  if (viewEl) viewEl.classList.remove("hidden");
-  $("#app-sidebar")?.classList.remove("mobile-open");
+    $$(".nav-btn[data-view]").forEach((b) =>
+      b.classList.toggle("active", b.dataset.view === viewName));
+    $$(".view").forEach((v) => v.classList.add("hidden"));
 
-  if (viewName === "timetable") loadGrid();
-  if (viewName === "classmates") { findClassmates(); loadRequests(); }
-  if (viewName === "social") { loadSocial(); loadRequests(); }
-  if (viewName === "compare") loadCompare();
-  if (viewName === "profile") loadProfile();
-  if (viewName === "swap") { loadSwap(); searchMarket(); }
+    const viewEl = $("#view-" + viewName);
+    if (viewEl) {
+      viewEl.classList.remove(...ALL_ANIM_CLASSES);
+      viewEl.classList.remove("hidden");
+      void viewEl.offsetWidth; // restart entrance animation cleanly
+      viewEl.classList.add(VIEW_ANIM[viewName] || "anim-ascend");
+    }
+    $("#app-sidebar")?.classList.remove("mobile-open");
+
+    if (viewName === "timetable") loadGrid();
+    if (viewName === "classmates") { findClassmates(); loadRequests(); }
+    if (viewName === "social") { loadSocial(); loadRequests(); }
+    if (viewName === "compare") loadCompare();
+    if (viewName === "profile") loadProfile();
+    if (viewName === "swap") { loadSwap(); searchMarket(); }
+  };
+
+  // Outgoing module sinks away first for a smooth modular hand-off
+  if (currentView && currentView.id !== "view-" + viewName && !IN_PLANETARY_MODE) {
+    currentView.classList.add("exit-down");
+    setTimeout(() => {
+      currentView.classList.add("hidden");
+      currentView.classList.remove("exit-down");
+      doOpen();
+    }, 200);
+  } else {
+    doOpen();
+  }
 }
 
 $("#sidebar-brand-home-btn")?.addEventListener("click", () => {
